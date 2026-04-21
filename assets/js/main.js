@@ -147,6 +147,7 @@ async function init() {
     let authorRef = author === "giorgia" ? 0 : 1;
     // loadExamples(week);
 
+/*
     if (dataRef[author + "_" + week]) {
         let json = await getData(dataRef[author + "_" + week])
         importData(json);
@@ -157,6 +158,7 @@ async function init() {
         }
         loadImg(url)
     }
+*/
 
     switchMode("rect")
     document.getElementById("jsonLoader").addEventListener("change", importFromJson);
@@ -633,7 +635,7 @@ function importFromJson(e) {
         // jsonObj.palette.primitive = {}
         // delete jsonObj.categories.time.prototype
 
-        importData(jsonObj).then(fillTable );
+        // importData(jsonObj).then(fillTable );
 
         // fillTable()
         // console.log(jsonObj)
@@ -723,7 +725,7 @@ async function importData(data) {
     updateMarks("size")
     fillPalette()
     populateSelect()
-    fillTable()
+    // fillTable()
 
 }
 
@@ -843,7 +845,7 @@ function purge() {
     svg.selectAll("image").remove();
     document.getElementById("paletteCont").innerHTML = "";
     populateSelect()
-    fillTable()
+    // fillTable()
 }
 
 function clearExamples() {

@@ -17,7 +17,12 @@ let primRot
 let global_anchors = {}
 let currAnchor = 0
 
-function fillPalette(range = [0, 10], reset = false) {
+function addAPalette() {
+    marks = {"temp": {}}
+    fillPalette()
+}
+
+function fillPalette(range = [0, 1], reset = false) {
 
     if (reset) {
         marks = {}
@@ -55,37 +60,6 @@ function fillPalette(range = [0, 10], reset = false) {
     container.appendChild(anchorCont)
 
 
-    for (let i = 0; i < sampleData.length; i++) {
-
-        if (sampleData[i]["data"]) {
-            for (const [key, value] of Object.entries(sampleData[i].data)) {
-                if (value?.proto?.canvas) {
-                    if (marks[key] === undefined) {
-                        marks[key] = {}
-                    }
-
-                    if (marks[key].displaytype !== undefined) {
-                        if (marks[key].displaytype === "range") {
-                            if (marks[key][value.value] === undefined) {
-                                marks[key][value.value] = value
-                                value.type = "area"
-                            }
-                        }
-                    } else {
-                        marks[key][value.value] = value
-                        marks[key].displaytype = "range"
-                    }
-                    /*if (marks[key][value.value] === undefined) {
-
-
-                        marks[key].displaytype = "repeat"
-                    }*/
-                }
-            }
-        }
-    }
-
-
     const mess = getOptions()
 
     const typesDisplay = "<option value ='range'>range</option>" +
@@ -96,7 +70,8 @@ function fillPalette(range = [0, 10], reset = false) {
         const tdiv = document.createElement("div")
         tdiv.id = "palette_" + key
         tdiv.className = "paletteMarks"
-        tdiv.innerHTML = "<h4 onclick='exportPalette(\"" + key + "\",\"mark\")' class='paletteData'>" + key + ":</h4>"
+        // tdiv.innerHTML = "<h4 onclick='exportPalette(\"" + key + "\",\"mark\")' class='paletteData'>" + key + ":</h4>"
+        tdiv.innerHTML = `<input type="text" oninput="" row="${tdiv.id}" value="${key}" class="waypointTitle" />`
 
         if (marks[key].displaytype !== undefined) {
             if (marks[key].displaytype === "repeat") {
@@ -147,8 +122,10 @@ function fillPalette(range = [0, 10], reset = false) {
                 tdiv.appendChild(tdiv_mark)
 
             } else if (marks[key].displaytype === "range") {
-
+                // let rangeCont = document.createElement("div")
+                // rangeCont.id = "range_"+key
                 makeRangeMark(range, key, tdiv, value, typesDisplay)
+                // tdiv.appendChild(rangeCont)
             } else if (marks[key].displaytype === "morph") {
 
                 const tdiv_mark = document.createElement("div")
@@ -177,12 +154,15 @@ function fillPalette(range = [0, 10], reset = false) {
                         setAnchorOnProto(e, this)
                     }
                 }
-
                 tdiv.appendChild(tdiv_mark)
             }
         } else {
 
+            // let rangeCont = document.createElement("div")
+            // rangeCont.id = "range_"+key
             makeRangeMark(range, key, tdiv, value, typesDisplay)
+            // tdiv.appendChild(rangeCont)
+            // makeRangeMark(range, key, tdiv, value, typesDisplay)
         }
 
         const div1 = document.createElement("div")
@@ -211,6 +191,9 @@ function fillPalette(range = [0, 10], reset = false) {
             let can = document.getElementById("canvas_" + key);
             let cont = can.getContext("2d")
 
+            let size = [60, 60]
+            can.width = size[0]
+            can.height = size[1]
 
             if (!value.proto) {
                 for (const [_, tval] of Object.entries(value)) {
@@ -221,14 +204,17 @@ function fillPalette(range = [0, 10], reset = false) {
                     }
 
                 }
+            } else {
+                size = fixRatio2([value.proto.canvas.width, value.proto.canvas.height], [60, 60])
+                can.width = size[0]
+                can.height = size[1]
+
+                cont.drawImage(value.proto.canvas, 0, 0, can.width, can.height)
             }
 
-            let size = fixRatio2([value.proto.canvas.width, value.proto.canvas.height], [60, 60])
 
-            can.width = size[0]
-            can.height = size[1]
 
-            cont.drawImage(value.proto.canvas, 0, 0, can.width, can.height)
+
         }
 
         setMarkEvent(key, marks[key].displaytype)
@@ -239,114 +225,6 @@ function fillPalette(range = [0, 10], reset = false) {
         })
     }
 
-    let tkeys = Object.keys(marks)
-
-    for (let i = 0; i < sampleData.length; i++) {
-        if (sampleData[i]["data"]) {
-            for (const [key, value] of Object.entries(sampleData[i].data)) {
-                if (!tkeys.includes(key) && !primitive[key]) {
-                    primitive[key] = {
-                        shape: "line",
-                        growth: "end",
-                        anchor_type: "start",
-                        color: "#555",
-                        angle: 90,
-                        stroke_width: 1
-                    }
-                }
-            }
-        }
-    }
-
-    for (const [key, value] of Object.entries(primitive)) {
-        const tdiv = document.createElement("div")
-        tdiv.id = "palette_" + key
-        tdiv.className = "paletteMarks"
-        tdiv.innerHTML = "<h4 onclick='exportPalette(\"" + key + "\",\"primitive\")' class='paletteData'>" + key + ":</h4>"
-        const tdiv_mark = document.createElement("div")
-        tdiv_mark.id = "mark_" + key
-        tdiv_mark.className = "paletteMark"
-        tdiv_mark.setAttribute("key", key)
-        tdiv_mark.innerHTML =
-            "<div class='primitiveData'>" +
-            "<p class='primitiveLabel'> Shape </p>" +
-            "<select>" +
-            "<option selected>line</option>" +
-            // "<option>start</option>" +
-            // "<option>middle</option>" +
-            "</select>" +
-            "</div>" +
-
-            // "<div class='primitiveData'>" +
-            // "<p class='primitiveLabel'> Growth </p>" +
-            // "<select id='" + key + "_primitiveGrowth'>" +
-            // "<option>start</option>" +
-            // "<option>middle</option>" +
-            // "<option selected>end</option>" +
-            // "</select>" +
-            // "</div>" +
-
-            "<div class='primitiveData'>" +
-            "<p class='primitiveLabel'> Anchor </p>" +
-            "<select id='" + key + "_primitiveAnchor'>" +
-            "<option selected>start</option>" +
-            "<option>middle</option>" +
-            "<option >end</option>" +
-            "</select>" +
-            "</div>" +
-
-            "<div class='primitiveData'>" +
-            "<p class='primitiveLabel'> Linked to Palette </p>" +
-            "<select id='" + key + "_primitivelinkedToPalette' class='palettelinkedTo'>" +
-            "<option selected>None</option>" +
-            +"" + mess +
-            "</select>" +
-            "</div>" +
-
-            "<div class='primitiveData'>" +
-            "<p class='primitiveLabel'> On Anchor </p>" +
-            "<select id='" + key + "_primitivelinkedTo' class='anchorLinkTo'>" +
-            "<option selected>None</option>" +
-            +mess +
-            "</select>" +
-            "</div>" +
-
-            "<div class='primitiveData'>" +
-            "<p class='primitiveLabel'> Angle </p>" +
-            "<input type='number' id='" + key + "_primitiveAngle' style='width: 70px' value='90'>" +
-            "</div>" +
-
-            "<div class='primitiveData'>" +
-            "<p class='primitiveLabel'> Color </p>" +
-            "<input type='color' id='" + key + "_primitiveColor'>" +
-            "</div>" +
-
-            "<div class='primitiveData'>" +
-            "<p class='primitiveLabel'> Stroke Width </p>" +
-            "<input type='range' id='" + key + "_primitiveWidth' style='width: 70px' min='1' max='10' value='1'>" +
-            "</div>" +
-
-            "<div class='primitiveData'>" +
-            "<p class='primitiveLabel'> Set Anchors </p>" +
-            "<select id='" + key + "_primitiveAnchors' class='primitiveAnchors'>" +
-            "<option selected>None</option>" +
-            +mess +
-            "</select>" +
-            "</div>" +
-
-            "<div class='primitiveData'>" +
-            "<p class='primitiveLabel'> Anchor Pos </p>" +
-            "<input type='range' id='" + key + "_primitiveAnchorLocation' style='width: 70px' min='0' max='100' value='0' step='10'>" +
-            "</div>"
-
-        tdiv.appendChild(tdiv_mark)
-
-        container.appendChild(tdiv)
-
-        setPrimitveEvents("", key)
-
-
-    }
 
     for (const [key, value] of Object.entries(categories)) {
         if (key !== "default") {
@@ -364,14 +242,14 @@ function fillPalette(range = [0, 10], reset = false) {
 
             if (value.prototype) {
                 // if (!palette_cat[key]) {
-                    palette_cat[key] = {
-                        type: "sample",
-                        apply: "none",
-                        color: value.color,
-                        name: key,
-                        style: "",
-                        proto: value.prototype,
-                    }
+                palette_cat[key] = {
+                    type: "sample",
+                    apply: "none",
+                    color: value.color,
+                    name: key,
+                    style: "",
+                    proto: value.prototype,
+                }
                 // }
 
                 let mess = getOptions()
@@ -431,14 +309,14 @@ function fillPalette(range = [0, 10], reset = false) {
             } else {
 
                 // if (!palette_cat[key]) {
-                    palette_cat[key] = {
-                        type: "attribute",
-                        apply: "none",
-                        color: value.color,
-                        name: key,
-                        style: "",
-                        colorOn: true
-                    }
+                palette_cat[key] = {
+                    type: "attribute",
+                    apply: "none",
+                    color: value.color,
+                    name: key,
+                    style: "",
+                    colorOn: true
+                }
                 // }
 
 
@@ -1578,9 +1456,53 @@ function makeRangeMark(range, key, tdiv, value, typesDisplay) {
                 setAnchorOnProto(e, this)
             }
         }
+        // tdiv.appendChild(tdiv_mark)
+
+        let moreCan = document.createElement("div")
+
+        moreCan.innerHTML = ` <img  src="assets/images/buttons/plus.png" class="buttonImg" style=";margin-top: 41px;
+  width: 25px;
+  margin-left: 5px;cursor: pointer"
+                           onclick="addACan(this,'${key}')">`
         tdiv.appendChild(tdiv_mark)
+        tdiv.appendChild(moreCan)
+
 
     }
+}
+
+
+function addACan(elem, key) {
+    let len = Object.keys(marks[key]).length
+
+    let tcan = document.createElement("canvas")
+
+    tcan.width = 60
+    tcan.height = 60
+
+    marks[key][len] = {
+        value: len,
+        type: "fake",
+        proto: {canvas: tcan, corners: [[0, 0], [tcan.width, tcan.height]]},
+    }
+
+    fillCans(elem.parentElement, marks[key][len], key, len, tcan)
+}
+
+function fillCans(elem, data, key, id, tcan) {
+    let cont = elem.parentElement
+
+
+    const tdiv_mark = document.createElement("div")
+    tdiv_mark.id = "mark_" + key
+    tdiv_mark.className = "paletteMark"
+    tdiv_mark.setAttribute("number", "" + id)
+    tdiv_mark.setAttribute("key", key)
+    tdiv_mark.innerHTML = "<p class='paletteNumber'>" + id + "</p>"
+    tdiv_mark.append(tcan)
+
+    cont.insertBefore(tdiv_mark, elem)
+
 }
 
 

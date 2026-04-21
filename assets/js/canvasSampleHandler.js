@@ -45,6 +45,28 @@ function switchMode(type) {
         can.onpointermove = onMouseMove
         can.onpointerup = onMouseUp
 
+    } else if (type === "grab") {
+
+        resetListeners(can)
+
+        can.onpointerdown = e => {
+            origin = {x: e.offsetX, y: e.offsetY};
+
+        };
+
+        can.onpointerup = e => {
+
+            const torigin = {...origin}
+
+            origin = null;
+
+            clear();
+            drawImage();
+
+            addGrabSample(torigin.x, torigin.y, e.offsetX - torigin.x, e.offsetY - torigin.y);
+        };
+        can.onpointermove = render;
+
     }
 
 
@@ -153,6 +175,92 @@ async function addRectSample(x, y, width, height) {
     fillSvg(sampleData)
 }
 
+
+async function addGrabSample(x, y, width, height) {
+
+
+    let coords = curateCoordinates(x, y, width, height);
+
+    otherGrab(coords);
+
+    let can = document.getElementById("inVis")
+    let trec = can.getBoundingClientRect()
+    let tx = trec.width
+    let ty = trec.height
+
+
+    let tcan = document.createElement('canvas');
+    // let tcont = tcan.getContext('2d');
+
+
+    tcan.width = coords[2]
+    tcan.height = coords[3]
+
+
+    let tcat = {}
+
+    tcat[selectedCategory] = categories[selectedCategory]
+
+
+    // let dp = tres
+
+
+    let marks = document.getElementById("marks")
+
+
+    let rCoords = [coords[0] / tx,
+        coords[1] / ty,
+        coords[2] / tx,
+        coords[3] / ty]
+
+
+    let placeHolder = document.createElement("canvas");
+    let tcont = placeHolder.getContext('2d');
+
+    placeHolder.width = currImg.naturalWidth
+    placeHolder.height = currImg.naturalHeight
+
+    tcont.drawImage(currImg, 0, 0)
+
+    console.log(placeHolder);
+    let grabbed = otherGrab(placeHolder, rCoords)
+    marks.append(grabbed)
+
+    console.log("dsadsadasda");
+    // tcont.drawImage(currImg,
+    //     Math.round(dp.rx * currImg.width),
+    //     Math.round(dp.ry * currImg.height),
+    //     Math.round(dp.rWidth * currImg.width),
+    //     Math.round(dp.rHeight * currImg.height),
+    //     0,
+    //     0,
+    //     dp.width,
+    //     dp.height);
+
+
+    // otherGrab(tcan)
+
+    let tres = {
+        x: coords[0],
+        y: coords[1],
+        width: coords[2],
+        height: coords[3],
+        type: "rect",
+        canvas: grabbed,
+        // img: tcan.toDataURL("image/png"), //use of imgs for furture works -> load from json ?
+        rx: coords[0] / tx,
+        ry: coords[1] / ty,
+        rWidth: coords[2] / tx,
+        rHeight: coords[3] / ty,
+        categories: tcat,
+        data: {}
+    }
+
+    sampleData.push(tres)
+
+
+    fillSvg(sampleData)
+}
 
 function curateCoordinates(x, y, width, height) {
 

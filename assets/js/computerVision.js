@@ -601,3 +601,33 @@ function toColor(canvas, r, g, b, threshold) {
     return res
 
 }
+
+
+function otherGrab(can, coords) {
+
+    let src = opencv.imread(can);
+    opencv.cvtColor(src, src, opencv.COLOR_RGBA2RGB, 0);
+    let mask = new opencv.Mat();
+    let bgdModel = new opencv.Mat();
+    let fgdModel = new opencv.Mat();
+    let rect = new opencv.Rect(coords.x, coords.y, coords.w, coords.h);
+    opencv.grabCut(src, mask, rect, bgdModel, fgdModel, 10, opencv.GC_INIT_WITH_RECT);
+// draw foreground
+    for (let i = 0; i < src.rows; i++) {
+        for (let j = 0; j < src.cols; j++) {
+            if (mask.ucharPtr(i, j)[0] == 0 || mask.ucharPtr(i, j)[0] == 2) {
+                src.ucharPtr(i, j)[0] = 0;
+                src.ucharPtr(i, j)[1] = 0;
+                src.ucharPtr(i, j)[2] = 0;
+            }
+        }
+    }
+    opencv.cvtColor(src, src, opencv.COLOR_RGB2RGBA, 0);
+    opencv.imshow(can, src);
+    src.delete();
+    mask.delete();
+    bgdModel.delete();
+    fgdModel.delete();
+
+    return can
+}

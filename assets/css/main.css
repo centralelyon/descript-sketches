@@ -479,3 +479,22 @@ table th {
 #newDataTable div input[type="text"]{
    width: 75px;
 }
+
+
+.waypointTitle {
+    font-weight: 600;
+    text-align: left;
+    margin-left: 29px;
+    color: #333;
+    border-radius: 0!important;
+    border: none !important;
+    border-color: #333;
+    border-bottom: 1px solid !important;;
+    /*padding: 5px 10px !important;*/
+    padding: 5px 2px !important;
+    outline: none !important;
+    width: 15%;
+    font-size: 20pt;
+    margin-right: 10px;
+    margin-top: 14px;
+}
