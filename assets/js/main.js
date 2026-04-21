@@ -145,7 +145,7 @@ async function init() {
         author = (author === null ? "giorgia" : author)
     }
     let authorRef = author === "giorgia" ? 0 : 1;
-    loadExamples(week);
+    // loadExamples(week);
 
     if (dataRef[author + "_" + week]) {
         let json = await getData(dataRef[author + "_" + week])
