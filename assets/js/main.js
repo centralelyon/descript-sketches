@@ -261,67 +261,7 @@ function fillCatMod(category) {
 
 
 docReady(function () {
-    document.getElementById("catContainer").addEventListener('click', (e) => {
 
-        const el = e.target;
-        let parent = null;
-
-        if (el.matches(".category")) {
-            parent = el
-        } else if (el.matches(".category p, .category div")) {
-            parent = el.parentNode;
-        } else if (el.matches(".category img")) {
-            parent = el.parentNode;
-            displayCat(parent.getAttribute("value"))
-
-        }
-
-        if (parent !== null) {
-
-            document.getElementById("selectedCat").removeAttribute("id")
-            parent.setAttribute("id", "selectedCat");
-            selectedCategory = parent.getAttribute("value");
-
-
-            if (seldots !== undefined) {
-                for (let i = 0; i < seldots.length; i++) {
-                    seldots[i].categories[selectedCategory] = categories[selectedCategory]
-                }
-
-                seldots = undefined;
-                over_on = true
-                d3.select("#lasso").remove();
-                drawImage()
-
-            }
-        }
-
-    });
-
-
-    document.getElementById("catContainer").addEventListener('mouseover', (e) => {
-
-        const el = e.target;
-        let parent = null;
-
-        if (el.matches(".category")) {
-            parent = el
-        } else if (el.matches(".category p, .category div")) {
-            parent = el.parentNode;
-        }
-
-        if (parent !== null) {
-            let samples = getSamplesFromCategory(parent.getAttribute("value"))
-            if (samples !== []) {
-                drawSamples(samples);
-            }
-        }
-    });
-
-    document.getElementById("catContainer").addEventListener('mouseout', (e) => {
-
-        resetImg()
-    });
 
     document.getElementById("marks").addEventListener('mouseout', (e) => {
         resetImg()
@@ -745,7 +685,7 @@ function drawCat(name, color, selected = false) {
     newCat.setAttribute("value", name);
 
     newCat.innerHTML = "<div class='lightBorder catColor' style='background-color: " + color + "'> </div> <p>" + name + "</p><img src=\"assets/images/buttons/edit.png\" class=\"editCat\">"
-    document.getElementById("catContainer").insertBefore(newCat, document.getElementById("addCat"))
+    // document.getElementById("catContainer").insertBefore(newCat, document.getElementById("addCat"))
 
 }
 
