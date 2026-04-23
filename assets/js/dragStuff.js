@@ -54,16 +54,25 @@ function dragElement(elmnt) {
 
             let telem = e.target.parentElement
 
-
             let id = telem.id.split("_")[1];
 
+            let type = telem.getAttribute("type");
 
-            let num = telem.getAttribute("number")
-            marks[id][num].source = elmnt
             let can = e.target
+            if (type === "range") {
+                let num = telem.getAttribute("number")
+                // marks[id][num].source = elmnt
+                megaPalettes[id].encodings.range.marks[num].source = elmnt
 
-            drawCanvasWithScale(elmnt, can, marks[id].scale)
+                drawCanvasWithScale(elmnt, can, megaPalettes[id].encodings.range.scale)
+            } else if (type === "morph") {
 
+                let num = telem.getAttribute("number")
+                megaPalettes[id].encodings.morph[num].proto.canvas = elmnt
+                megaPalettes[id].encodings.morph[num].proto.size = [elmnt.width, elmnt.height]
+                drawCanvasWithScale(elmnt, can, 1)
+
+            }
 
         }
     }
@@ -75,7 +84,7 @@ function drawCanvasWithScale(elmnt, can, scale) {
     if (scale == null) {
         scale = 1
     }
-
+    
 
     let cont = can.getContext("2d")
     cont.clearRect(0, 0, can.width, can.height)

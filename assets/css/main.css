@@ -13,8 +13,9 @@ body {
 }
 
 .paletteMark {
-    display: inline-block;
+    display: flex;
     width: fit-content;
+    flex-direction: column;
 }
 
 .paletteMark canvas {
@@ -514,4 +515,28 @@ table th {
 
 .scaleMarks {
     width: 120px;
+}
+
+
+.paletteMarkName {
+    font-weight: 500;
+    text-align: center;
+
+    color: #333;
+    border-radius: 0 !important;
+    border: none !important;
+    border-color: #333;
+    border-bottom: 1px solid !important;;
+    /*padding: 5px 10px !important;*/
+    padding: 5px 2px !important;
+    outline: none !important;
+    width: 52px;
+    font-size: 9pt;
+
+    line-height: 13px;
+    height: 13px !important;
+
+    display: inline-block;
+    margin-bottom: 3px;
+    margin-left: 6px;
 }

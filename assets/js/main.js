@@ -664,7 +664,7 @@ async function importData(data) {
     updateCategories()
     updateMarks("size")
     fillPalette()
-    populateSelect()
+    // populateSelect()
     // fillTable()
 
 }
@@ -784,7 +784,7 @@ function purge() {
     const svg = d3.select('#svgDisplay');
     svg.selectAll("image").remove();
     document.getElementById("paletteCont").innerHTML = "";
-    populateSelect()
+    // populateSelect()
     // fillTable()
 }
 
