@@ -585,7 +585,7 @@ function saveCollage() {
         fillSvg(sampleData)
         document.getElementById("collageList").innerHTML = ""
         svg.innerHTML = ""
-        fillTable()
+        // fillTable()
     }
 }
 

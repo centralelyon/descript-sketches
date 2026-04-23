@@ -17,8 +17,14 @@ let primRot
 let global_anchors = {}
 let currAnchor = 0
 
+let palIt = 0
+
 function addAPalette() {
-    marks = {"temp": {}}
+
+
+    marks["temp" + palIt] = {}
+
+    ++palIt
     fillPalette()
 }
 
@@ -29,7 +35,7 @@ function fillPalette(range = [0, 1], reset = false) {
         primitive = {}
         global_anchors = {}
         palette_cat = {}
-        fillTable()
+        // fillTable()
     }
 
     const container = document.getElementById("paletteCont")
@@ -167,9 +173,11 @@ function fillPalette(range = [0, 1], reset = false) {
 
         const div1 = document.createElement("div")
         const div2 = document.createElement("div")
+        const div3 = document.createElement("div")
 
         div1.className = "primitiveData"
         div2.className = "primitiveData"
+        div3.className = "primitiveData"
         div1.innerHTML = "<p class='primitiveLabel'> Linked to Palette </p>" +
             "<select id='" + key + "_markLinkedToPalette' class='palettelinkedTo'>" +
             "<option selected>None</option>" +
@@ -182,8 +190,17 @@ function fillPalette(range = [0, 1], reset = false) {
             +mess +
             "</select>"
 
+
+        div3.innerHTML =
+            "<p class='primitiveLabel'>Scale </p>" +
+            "<input type='range' min='0.5' max='3' step='0.1' value='1' id='" + key + "_markScale' class='scaleMarks'>"
+
+
+
         tdiv.appendChild(div1)
         tdiv.appendChild(div2)
+        tdiv.appendChild(div3)
+
 
         container.appendChild(tdiv)
 
@@ -213,8 +230,6 @@ function fillPalette(range = [0, 1], reset = false) {
             }
 
 
-
-
         }
 
         setMarkEvent(key, marks[key].displaytype)
@@ -224,147 +239,6 @@ function fillPalette(range = [0, 1], reset = false) {
                 option.setAttribute("selected", "true")
         })
     }
-
-
-    for (const [key, value] of Object.entries(categories)) {
-        if (key !== "default") {
-            const tdiv = document.createElement("div")
-            tdiv.id = "palette_" + key
-            tdiv.className = "paletteMarks"
-            tdiv.innerHTML = "<h4 onclick='exportPalette(\"" + key + "\",\"category\")' class='paletteData'>" + key + ":</h4>"
-
-            const tdiv_mark = document.createElement("div")
-            tdiv_mark.id = "cat_" + key
-            tdiv_mark.className = "paletteMark"
-            tdiv_mark.setAttribute("key", key)
-            let mess = getMarks()
-
-
-            if (value.prototype) {
-                // if (!palette_cat[key]) {
-                palette_cat[key] = {
-                    type: "sample",
-                    apply: "none",
-                    color: value.color,
-                    name: key,
-                    style: "",
-                    proto: value.prototype,
-                }
-                // }
-
-                let mess = getOptions()
-
-                tdiv_mark.innerHTML =
-                    /*                  "<div class='primitiveData'>" +
-                                      "<p class='primitiveLabel'> Link to Anchor </p>" +
-                                      "<select id='" + key + "_catlinkedTo' class='catLinkTo" + (value.prototype ? "Proto" : "") + "'>" +
-                                      "<option selected>None</option>" +
-                                      +"" + mess +
-                                      "</select>" +
-                                      "</div>" +*/
-
-                    "<div class='primitiveData'>" +
-                    "<canvas type='cat' id='canvas_" + key + "' style='width: 60px;height: 60px'>'" +
-                    "</div>" +
-
-                    "<div class='primitiveData'>" +
-                    "<p class='primitiveLabel'> Style </p>" +
-                    "<input style='width: 150px' type='text' value='' id='" + key + "_catStyle'>" +
-                    "</div>" +
-
-                    "<div class='primitiveData'>" +
-                    "<p class='primitiveLabel'> Linked to Palette </p>" +
-                    "<select id='" + key + "_catlinkedToPalette' class='palettelinkedTo'>" +
-                    "<option selected>None</option>" +
-                    +"" + mess +
-                    "</select>" +
-                    "</div>" +
-                    "<div class='primitiveData'>" +
-                    "<p class='primitiveLabel'> On Anchor </p>" +
-                    "<select id='" + key + "_catlinkedTo' class='anchorLinkTo'>" +
-                    "<option selected>None</option>" +
-                    +mess +
-                    "</select>" +
-                    "</div>"
-
-
-                /*            "<div class='primitiveData'>" +
-                            "<p class='primitiveLabel'> Color </p>" +
-                            "<input type='color' value='" + categories[key].color + "' id='" + key + "_catColor'>" +
-                            "</div>"*/
-
-                tdiv_mark.onclick = function (e) {
-                    if (mode !== "anchor") {
-
-                        let t = document.getElementById("canvas_" + key)
-                        if (e.target.matches("canvas")) {
-                            editPalette(t)
-                        }
-                    } else {
-                        //TODO: Set for CATA and other primitive
-                        setAnchorOnProto(e, this)
-                    }
-                }
-
-            } else {
-
-                // if (!palette_cat[key]) {
-                palette_cat[key] = {
-                    type: "attribute",
-                    apply: "none",
-                    color: value.color,
-                    name: key,
-                    style: "",
-                    colorOn: true
-                }
-                // }
-
-
-                tdiv_mark.innerHTML =
-                    "<div class='primitiveData'>" +
-                    "<p class='primitiveLabel'> Link to Mark </p>" +
-                    "<select id='" + key + "_catlinkedToMark' class='catLinkToMark'>" +
-                    "<option selected>None</option>" +
-                    +"" + mess +
-                    "</select>" +
-                    "</div>" +
-
-                    "<div class='primitiveData'>" +
-                    "<p class='primitiveLabel'> Use color </p>" +
-                    "<input style='width: 30px' min ='0' max='1'  type='range' value='1' id='" + key + "_catColorOn'>" +
-                    "</div>" +
-
-                    "<div class='primitiveData'>" +
-                    "<p class='primitiveLabel'> Color </p>" +
-                    "<input type='color' value='" + categories[key].color + "' id='" + key + "_catColor'>" +
-                    "</div>" +
-
-                    "<div class='primitiveData'>" +
-                    "<p class='primitiveLabel'> Style </p>" +
-                    "<input style='width: 150px' type='text' value='' id='" + key + "_catStyle'>" +
-                    "</div>"
-            }
-
-            tdiv.appendChild(tdiv_mark)
-            container.appendChild(tdiv)
-
-            setCatEvents("", key)
-
-            if (value.prototype) {
-                let can = document.getElementById("canvas_" + key);
-
-                let cont = can.getContext("2d")
-
-                let size = fixRatio2([value.prototype.canvas.width, value.prototype.canvas.height], [60, 60])
-
-                can.width = size[0]
-                can.height = size[1]
-
-                cont.drawImage(value.prototype.canvas, 0, 0, can.width, can.height)
-            }
-        }
-    }
-
 
     let trange = document.getElementById("strokewidth")
 
@@ -400,7 +274,6 @@ function editPalette(e) {
 
     selectedPalette = [key, num, type]
 
-    console.log(selectedPalette);
     paletteResetZoom()
 
     let can = document.getElementById("paletteEdit")
@@ -1387,6 +1260,19 @@ function setMarkEvent(key, type) {
     }
 
 
+    document.getElementById(key + "_markScale").onchange = function (e) {
+
+        const key = this.getAttribute("id").split("_")[0];
+            marks[key].scale = +this.value
+
+        for (const [tkey, value] of Object.entries(marks[key])) {
+            drawCanvasWithScale(value.source, value.proto.canvas, marks[key].scale)
+        }
+
+
+
+    }
+
     document.getElementById(key + "_markLinkedToPalette").onchange = function (e) {
 
         const key = this.getAttribute("id").split("_")[0];
@@ -1426,6 +1312,11 @@ function makeRangeMark(range, key, tdiv, value, typesDisplay) {
 
     tdiv.innerHTML += t
 
+    let tnb = Object.keys(value).length
+
+    if (tnb >0 ) {
+        range = [0,tnb]
+    }
 
     for (let i = range[0]; i < range[1]; i++) {
         const tdiv_mark = document.createElement("div")
@@ -1458,17 +1349,19 @@ function makeRangeMark(range, key, tdiv, value, typesDisplay) {
         }
         // tdiv.appendChild(tdiv_mark)
 
-        let moreCan = document.createElement("div")
-
-        moreCan.innerHTML = ` <img  src="assets/images/buttons/plus.png" class="buttonImg" style=";margin-top: 41px;
-  width: 25px;
-  margin-left: 5px;cursor: pointer"
-                           onclick="addACan(this,'${key}')">`
         tdiv.appendChild(tdiv_mark)
-        tdiv.appendChild(moreCan)
+
 
 
     }
+
+    let moreCan = document.createElement("div")
+
+    moreCan.innerHTML = ` <img  src="assets/images/buttons/plus.png" class="buttonImg" style=";margin-top: 41px;
+  width: 25px;
+  margin-left: 5px;cursor: pointer"
+                           onclick="addACan(this,'${key}')">`
+    tdiv.appendChild(moreCan)
 }
 
 

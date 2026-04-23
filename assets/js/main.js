@@ -159,7 +159,7 @@ async function init() {
         loadImg(url)
     }
 */
-
+    loadImg("assets/images/hand/sudoku.jpg")
     switchMode("rect")
     document.getElementById("jsonLoader").addEventListener("change", importFromJson);
     document.getElementById("imgLoader").addEventListener("change", importImg);
@@ -267,17 +267,17 @@ docReady(function () {
         resetImg()
     });
 
-    document.getElementById("svgControl").addEventListener('click', (e) => {
+    // document.getElementById("svgControl").addEventListener('click', (e) => {
 
-        let el = e.target
-
-        if (el.matches('img')) {
-            el = el.parentNode
-            document.getElementById("selectedButton3").removeAttribute("id")
-            el.setAttribute("id", "selectedButton3")
-
-        }
-    });
+//         let el = e.target
+//
+//         if (el.matches('img')) {
+//             el = el.parentNode
+//             document.getElementById("selectedButton3").removeAttribute("id")
+//             el.setAttribute("id", "selectedButton3")
+//
+//         }
+//     });
 });
 
 

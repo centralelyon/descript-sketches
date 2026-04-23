@@ -15,9 +15,30 @@ let offset
 let selectedImg
 let tx
 
-function fillSvg(marks) {
+function fillSampleBar(marks) {
+    const container = document.getElementById("sampledMarks")
+    container.innerHTML = ""
+    for (let i = 0; i < marks.length; i++) {
 
-    const tsvg = document.getElementById("inVis")
+        let tcan = document.createElement("canvas");
+        tcan.width = marks[i].width
+        tcan.height = marks[i].height
+
+        let tcont = tcan.getContext("2d")
+
+        tcan.setAttribute("num", i)
+        tcont.drawImage(marks[i].canvas, 0, 0)
+
+        dragElement(tcan)
+        container.appendChild(tcan)
+    }
+}
+
+
+function fillSvg(marks) {
+    fillSampleBar(marks)
+
+    /*const tsvg = document.getElementById("inVis")
 
 
     const rect = tsvg.getBoundingClientRect()
@@ -91,7 +112,7 @@ function fillSvg(marks) {
 
     svg.selectAll("image").call(drag2)
 
-
+*/
 }
 
 function loopViews(timer = 3000) {

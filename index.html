@@ -25,7 +25,8 @@
     <script src="assets/js/svgHandler.js"></script>
     <script src="assets/js/paletteHandler.js"></script>
     <script src="assets/js/collageHandler.js"></script>
-    <script src="assets/js/tableHandler.js"></script>
+<!--    <script src="assets/js/tableHandler.js"></script>-->
+    <script src="assets/js/dragStuff.js"></script>
     <script src="assets/js/main.js"></script>
 
 
@@ -146,7 +147,7 @@
 
 
             <div id="marksDisplay" style="margin-top: 0;width: 100%">
-                <div id="svgControl">
+                <!--<div id="svgControl">
                     <div class="buttonImg" id="selectedButton3">
                         <img src="assets/images/buttons/default.png" class="lightBorder"
                              onclick="switchSvg(sampleData,'default')"
@@ -161,21 +162,25 @@
                         <img src="assets/images/buttons/chart.png" class="lightBorder"
                              onclick="switchSvg(sampleData,'scatter')"
                              style=""/>
-                    </div>
+                    </div>-->
                     <!--                <div class="buttonImg">
                                         <img src="assets/images/buttons/cat.png" class="lightBorder"
                                              onclick="switchSvg(sampleData,'default')"
                                              style=""/>
                                     </div>
                 -->
-                    <div id="secondControl"
+                 <!--   <div id="secondControl"
                          style="display: inline-block;position: absolute;width: fit-content;margin-left:10px "></div>
+                </div>-->
+                <div id="sampledMarks" style="width: 100%;height: 120px;border: 1px solid black;border-radius: 5px">
+
                 </div>
-                <svg style="width: 100%; height: 0" preserveAspectRatio="xMinYMin meet" viewBox="0 0 600 600"
+
+             <!--   <svg style="width: 100%; height: 0" preserveAspectRatio="xMinYMin meet" viewBox="0 0 600 600"
                      id="svgDisplay">
 
                 </svg>
-
+-->
             </div>
         </div>
 

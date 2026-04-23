@@ -470,14 +470,14 @@ table th {
 }
 
 
-#newDataTable div p{
+#newDataTable div p {
     font-weight: 700;
     margin-bottom: 0;
     margin-right: 23px;
 }
 
-#newDataTable div input[type="text"]{
-   width: 75px;
+#newDataTable div input[type="text"] {
+    width: 75px;
 }
 
 
@@ -486,7 +486,7 @@ table th {
     text-align: left;
     margin-left: 29px;
     color: #333;
-    border-radius: 0!important;
+    border-radius: 0 !important;
     border: none !important;
     border-color: #333;
     border-bottom: 1px solid !important;;
@@ -497,4 +497,21 @@ table th {
     font-size: 20pt;
     margin-right: 10px;
     margin-top: 14px;
+}
+
+#sampledMarks canvas {
+    max-height: 110px;
+    margin-right: 2px;
+    border: 1px solid #777;
+    border-radius: 4px;
+}
+
+#sampledMarks {
+    overflow-x: auto;
+    display: flex;
+    padding: 2px;
+}
+
+.scaleMarks {
+    width: 120px;
 }
