@@ -540,3 +540,32 @@ table th {
     margin-bottom: 3px;
     margin-left: 6px;
 }
+
+#AllPaletteCont canvas {
+
+    border: 1px solid #555;
+
+    border-radius: 4px;
+}
+
+#fakeGrammar {
+    width: 40%;
+}
+
+#fakePreview {
+    width: 60%;
+    height: 500px;
+}
+
+#fakePreviewSvg {
+    width: 100%;
+    border: solid #555 1px;
+    border-radius: 14px;
+    height: 100%;
+}
+
+.fakeGrammarRow {
+    display: flex;
+    width: 100%;
+
+}

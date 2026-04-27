@@ -59,6 +59,9 @@ function dragElement(elmnt) {
             let type = telem.getAttribute("type");
 
             let can = e.target
+
+             removeColor(230, 230, 230, can, 25)
+             removeColor(230, 230, 230, elmnt, 25)
             if (type === "range") {
                 let num = telem.getAttribute("number")
                 // marks[id][num].source = elmnt

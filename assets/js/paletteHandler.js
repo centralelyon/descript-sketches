@@ -35,6 +35,8 @@ function addAPalette() {
 
     ++palIt
     fillPalette()
+
+    drawSvg()
 }
 
 
@@ -290,7 +292,7 @@ function editPalette(e) {
 
     if (type === "mark") {
         if (num) {
-            proto = marks[key][num].proto
+            proto = megaPalettes[key].encodings.range.marks[num].proto
         } else {
             proto = marks[key].proto
         }
@@ -710,7 +712,8 @@ function savePalette() {
     let resCan
     if (selectedPalette[2] === "mark") {
         if (selectedPalette[1]) {
-            resCan = marks[selectedPalette[0]][selectedPalette[1]].proto.canvas
+            resCan = megaPalettes[selectedPalette[0]].encodings.range.marks[selectedPalette[1]].proto.canvas
+            // resCan = marks[selectedPalette[0]][selectedPalette[1]].proto.canvas
         } else {
             resCan = marks[selectedPalette[0]].proto.canvas
         }
@@ -744,7 +747,9 @@ function savePalette() {
 
     if (selectedPalette[2] === "mark") {
         if (selectedPalette[1]) {
-            marks[selectedPalette[0]][selectedPalette[1]].proto.corners = corn
+
+            // marks[selectedPalette[0]][selectedPalette[1]].proto.corners = corn
+            megaPalettes[selectedPalette[0]].encodings.range.marks[selectedPalette[1]].proto.corners = corn
         } else {
             marks[selectedPalette[0]].proto.corners = corn
 

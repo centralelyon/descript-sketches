@@ -159,14 +159,20 @@ async function init() {
         loadImg(url)
     }
 */
-    loadImg("assets/images/hand/sudoku.jpg")
+    loadImg("assets/images/hand/notice.png")
     switchMode("rect")
+
+    await loadDataset("assets/tempData/penguins.csv")
+    drawSvg()
     document.getElementById("jsonLoader").addEventListener("change", importFromJson);
     document.getElementById("imgLoader").addEventListener("change", importImg);
     document.getElementById("paletteLoader").addEventListener("change", importPalette);
 
 
 }
+
+
+
 
 async function getData(url) {
 
