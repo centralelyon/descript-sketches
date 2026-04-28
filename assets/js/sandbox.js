@@ -6,9 +6,56 @@ let chartAxis = {
     y: "body_mass_g"
 }
 
+
+const datasetList = ["pinguin"]
+
+let megaGlyph = {}
+
+let debugGlyph = {
+    temp0: {
+        dataColumn: "species",
+        color: {
+            dataColumn: "species",
+            scale: "ordinal",
+        },
+        size: {
+            dataColumn: "species",
+            scale: "linear",
+        },
+        intensity: {
+            dataColumn: "species",
+            scale: "linear",
+        }
+    },
+
+    temp2: {
+        dataColumn: "species",
+        color: {
+            dataColumn: "species",
+            scale: "ordinal",
+        },
+        size: {
+            dataColumn: "species",
+            scale: "linear",
+        },
+        intensity: {
+            dataColumn: "species",
+            scale: "linear",
+        }
+    }
+}
+
 let chartDataset = {
     data: []
 }
+
+let defaultCan = document.createElement('canvas')
+defaultCan.width = 30
+defaultCan.height = 30
+let defaultCont = defaultCan.getContext("2d")
+
+defaultCont.fillStyle = "#fff"
+defaultCont.fillRect(0, 0, 30, 30)
 
 async function loadDataset(url) {
     let data = await loadCsv(url).then(r => r)
@@ -48,106 +95,90 @@ async function drawSvg() {
             .attr("cx", d => xScale(d[chartAxis.x]))
             .attr("cy", d => yScale(d[chartAxis.y]))
             .attr("r", 5)
+
     } else if (encodings.length === 1) {
+        if (encodings[0] !== "new") {
 
-        let pal = megaPalettes[encodings[0]]
 
-        if (pal.displayType === "range") {
+            let pal = megaPalettes[encodings[0]]
 
-            let markKeys = Object.keys(pal.encodings.range.marks)
+            if (pal.displayType === "range") {
 
-            let marks = pal.encodings.range.marks
+                let markKeys = Object.keys(pal.encodings.range.marks)
 
-            if (markKeys[0].match(/mark[0-9]/)) {
+                let marks = pal.encodings.range.marks
 
-                let allVals = [...new Set(data.map(d => d[dataBinding[encodings[0]]]))]
+                if (markKeys[0].match(/mark[0-9]/)) {
 
-                marks = {}
+                    let allVals = [...new Set(data.map(d => d[dataBinding[encodings[0]]]))]
 
-                for (let i = 0; i < allVals.length; i++) {
+                    marks = {}
 
-                    if (i < markKeys.length) {
-                        marks[allVals[i]] = pal.encodings.range.marks[markKeys[i]]
-                    } else {
-                        marks[allVals[i]] = pal.encodings.range.marks[markKeys[0]] //todo: set a default visual when no encoding is provided
+                    for (let i = 0; i < allVals.length; i++) {
+
+                        if (i < markKeys.length) {
+                            marks[allVals[i]] = pal.encodings.range.marks[markKeys[i]]
+                        } else {
+                            marks[allVals[i]] = pal.encodings.range.marks[markKeys[0]] //todo: set a default visual when no encoding is provided
+                        }
+
                     }
 
+
                 }
+
+                marks[undefined] = {source: defaultCont}
+                marks[NaN] = {source: defaultCont}
+                marks[null] = {source: defaultCont}
+
+                console.log(marks);
+
+                svg.selectAll("dots")
+                    .data(data)
+                    .enter()
+                    .append("image")
+                    .attr("xlink:href", d => marks[d[dataBinding[encodings[0]]]].source.toDataURL("image/png"))
+                    .attr("x", d => xScale(d[chartAxis.x]))
+                    .attr("y", d => yScale(d[chartAxis.y]))
+                    .attr("width", d => marks[d[dataBinding[encodings[0]]]].source.width)
+                    .attr("height", d => marks[d[dataBinding[encodings[0]]]].source.height)
+
+
+            } else if (pal.displayType === "morph") {
+
+                let sizeScale = d3.scaleLinear(d3.extent(data.map(d => d[dataBinding[encodings[0]]])), [pal.encodings.morph.min.proto.size[0], pal.encodings.morph.max.proto.size[0]])
+
+
+                svg.selectAll("dots")
+                    .data(data)
+                    .enter()
+                    .append("image")
+                    .attr("xlink:href", pal.encodings.morph.max.proto.canvas.toDataURL("image/png"))
+                    .attr("x", d => xScale(d[chartAxis.x]))
+                    .attr("y", d => yScale(d[chartAxis.y]))
+                    .attr("width", d => {
+                        return sizeScale(d[dataBinding[encodings[0]]])
+                    })
+                    .attr("height", d => sizeScale(d[dataBinding[encodings[0]]]))
 
 
             }
 
-            console.log(marks);
-
-            svg.selectAll("dots")
-                .data(data)
-                .enter()
-                .append("image")
-                .attr("xlink:href", d => marks[d[dataBinding[encodings[0]]]].source.toDataURL("image/png"))
-                .attr("x", d => xScale(d[chartAxis.x]))
-                .attr("y", d => yScale(d[chartAxis.y]))
-                .attr("width", d => marks[d[dataBinding[encodings[0]]].source.width])
-                .attr("height", d => marks[d[dataBinding[encodings[0]]].source.height])
-
-
-        } else if (pal.displayType === "morph") {
-
-            let sizeScale = d3.scaleLinear(d3.extent(data.map(d => d[dataBinding[encodings[0]]])), [pal.encodings.morph.min.proto.size[0], pal.encodings.morph.max.proto.size[0]])
-
-
-            svg.selectAll("dots")
-                .data(data)
-                .enter()
-                .append("image")
-                .attr("xlink:href", pal.encodings.morph.max.proto.canvas.toDataURL("image/png"))
-                .attr("x", d => xScale(d[chartAxis.x]))
-                .attr("y", d => yScale(d[chartAxis.y]))
-                .attr("width", d => {
-                    return sizeScale(d[dataBinding[encodings[0]]])
-                })
-                .attr("height", d => sizeScale(d[dataBinding[encodings[0]]]))
-
-
         }
-
-
     } else {
 
         let tmarks = makeMarks(encodings, data)
-        console.log(tmarks);
-        let tcan = makeCollageFromData(encodings, tmarks, data[0])
-        let bbox = getBBox(tcan)
 
-        let can = document.createElement("canvas")
-        let context = can.getContext("2d")
-        context.drawImage(tcan, 0, 0, can.width, can.height)
+        let order = getOrder(encodings)
 
-        context.drawImage(tcan, bbox[0][0], bbox[0][1], can.width, can.height, 0, 0, can.width, can.height)
-
-
-        can.width = bbox[1][0] - bbox[0][0]
-        can.height = bbox[1][1] - bbox[0][1]
-
-        console.log(bbox[0][0], bbox[0][1], can.width, can.height)
-
-        ;
-        svg.append("image")
-            .attr("x", 20)
-            .attr("y", 20)
-            .attr("width", 200)
-            .attr("height", 200)
-            .attr("xlink:href", can.toDataURL("image/png"))
-
-        /*        svg.selectAll("dots")
-                    .data(data)
-                    .enter()
-                    .append("image")
-                    .attr("xlink:href", d =>
-                        makeCollageFromData(encodings, d).toDataURL("image/png"))
-                    .attr("x", d => xScale(d[chartAxis.x]))
-                    .attr("y", d => yScale(d[chartAxis.y]))*/
-        // .attr("width", d => marks[d[dataBinding[encodings[0]]].source.width])
-        // .attr("height", d => marks[d[dataBinding[encodings[0]]].source.height])
+        svg.selectAll("dots")
+            .data(data)
+            .enter()
+            .append("image")
+            .attr("xlink:href", d =>
+                makeCollageFromData(encodings, order, tmarks, d).toDataURL("image/png"))
+            .attr("x", d => xScale(d[chartAxis.x]))
+            .attr("y", d => yScale(d[chartAxis.y]))
 
         //TODO: here generate glyphs WRT data and use it as a single image
     }
@@ -158,29 +189,262 @@ async function drawSvg() {
 
 function populateSandboxMenu(data) {
 
-    let keys = Object.keys(data[0])
+
+    let chartSettingsContainer = document.getElementById("chartSettings");
+    chartSettingsContainer.innerHTML = '';
+    let select = document.createElement("select");
+
+    select.innerHTML = `<option>penguins.csv </option>`;
+
+    let datasetRow = document.createElement("div");
+
+    datasetRow.innerHTML = `<p> Dataset</p>`;
+    datasetRow.classList.add("fakeGrammarRow")
+
+    datasetRow.appendChild(select)
+
+    chartSettingsContainer.appendChild(datasetRow)
 
 
-    let container = document.getElementById("fakeGrammar");
-    container.innerHTML = '';
     let axes = ["x", "y"];
 
+    let keys = Object.keys(data[0])
     for (let i = 0; i < axes.length; i++) {
         let tdiv = makeAxisMenu(keys, axes[i], chartAxis[axes[i]]);
         tdiv.classList.add("fakeGrammarRow")
-        container.append(tdiv);
+        chartSettingsContainer.append(tdiv);
     }
 
-    for (let i = 0; i < keys.length; i++) {
 
-        let tdiv = makeSingleMenu(keys[i], dataBinding[keys[i]]);
-        tdiv.classList.add("fakeGrammarRow")
-        container.append(tdiv);
+    /*    let container = document.getElementById("fakeGrammar");
+        container.innerHTML = '';
+        for (let i = 0; i < keys.length; i++) {
 
-    }
+            let tdiv = makeSingleMenu(keys[i], dataBinding[keys[i]]);
+            tdiv.classList.add("fakeGrammarRow")
+            container.append(tdiv);
+
+        }*/
 
 }
 
+function makePaletteMenu(palettes, name = undefined) {
+    let select = document.createElement("select");
+
+    if (name === undefined || name === "new") {
+        select.innerHTML += `<option value="new">*new*</option>`;
+
+    }
+
+    select.setAttribute("name", name);
+    for (const [key, value] of Object.entries(palettes)) {
+        select.innerHTML += `<option ${(value === name ? "selected" : "")}  value="${value}">${value}</option>`;
+    }
+
+    select.onchange = function (e) {
+        let tval = select.value
+        let prev = select.getAttribute("name");
+        megaGlyph[tval] = megaGlyph[prev]
+        delete megaGlyph[prev];
+
+        makeMarkTree()
+    }
+
+    return select;
+
+}
+
+function makeDataColumnMenu(columns, name, selected, mode = "palette") {
+    let select = document.createElement("select");
+    select.setAttribute("name", name);
+    select.setAttribute("mode", mode);
+
+
+    select.innerHTML += `<option value="none">none</option>`;
+    for (const [key, value] of Object.entries(columns)) {
+        select.innerHTML += `<option ${(value === selected ? "selected" : "")} value="${value}">${value}</option>`;
+    }
+
+    if (mode === "palette") {
+
+
+        select.onchange = function (e) {
+            let tval = select.value
+            let palette = select.getAttribute("name");
+
+            if (megaGlyph[palette]) {
+                megaGlyph[palette].dataColumn = tval
+            } else {
+                megaGlyph[palette] = {
+                    dataColumn: tval
+                }
+            }
+
+
+            if (tval === "none") {
+                delete dataBinding[palette]
+            } else {
+                dataBinding[palette] = tval
+            }
+            drawSvg()
+            // delete megaGlyph[prev];
+
+        }
+
+    } else {
+
+        select.onchange = function (e) {
+            let tval = select.value
+            let palette = select.getAttribute("name");
+            let mode = select.getAttribute("mode");
+
+            if (megaGlyph[palette]) {
+
+                if (megaGlyph[palette][mode]) {
+                    megaGlyph[palette][mode].dataColumn = tval
+                } else {
+                    megaGlyph[palette][mode] = {dataColumn: tval}
+                }
+            } else {
+                megaGlyph[palette] = {
+                    dataColumn: tval
+                }
+            }
+
+            drawSvg()
+
+        }
+    }
+
+    return select;
+}
+
+
+function makeParamOption(name, columns, palette) {
+    let list = document.createElement("li");
+
+    let tselected = undefined
+
+    if (megaGlyph[palette][name]) {
+        if (megaGlyph[palette][name].dataColumn) {
+            tselected = megaGlyph[palette][name].dataColumn
+        }
+    }
+    let select = makeDataColumnMenu(columns, palette, tselected, name)
+
+    let div = document.createElement("div");
+    div.classList.add("fakeGrammarRow")
+
+    let p = document.createElement("p");
+    p.innerHTML = `${name}:`;
+
+
+    div.appendChild(p)
+    div.appendChild(select)
+    list.appendChild(div)
+
+    return list
+}
+
+function makeMarkTree() {
+    let palettes = Object.keys(megaPalettes)
+    let columns = Object.keys(chartDataset.data[0])
+
+    let glyph = megaGlyph
+
+    let root = document.getElementById("glyphTree")
+
+
+    root.innerHTML = ``
+
+
+    for (const [key, value] of Object.entries(glyph)) {
+        let container = document.createElement("li");
+        let details = document.createElement("details");
+        details.setAttribute("open", "")
+        let summary = document.createElement("summary");
+
+
+        // ---------------------- Mark & data column selector ------------------
+        let tdiv = document.createElement("div");
+        tdiv.classList.add("fakeGrammarRow")
+
+        let p = document.createElement("p");
+        p.innerHTML = " | ";
+        p.classList.add("fakeGrammarLabel")
+
+        let labelMark = document.createElement("p");
+        labelMark.innerHTML = "Palette";
+        labelMark.classList.add("fakeGrammarTitleMark")
+
+        let labelData = document.createElement("p");
+        labelData.innerHTML = "Data";
+        labelData.classList.add("fakeGrammarTitleData")
+
+        tdiv.appendChild(labelMark)
+        tdiv.appendChild(labelData)
+
+        tdiv.appendChild(makePaletteMenu(palettes, key))
+        tdiv.appendChild(p)
+        tdiv.appendChild(makeDataColumnMenu(columns, key, value.dataColumn))
+
+        summary.appendChild(tdiv)
+        details.appendChild(summary)
+        container.appendChild(details)
+
+        // ---------------------- Mark rendering Settings------------------
+
+
+        let markParamContainer = document.createElement("ul");
+
+
+        let color = makeParamOption("color", columns, key)
+        let size = makeParamOption("size", columns, key)
+
+        markParamContainer.appendChild(color)
+        markParamContainer.appendChild(size)
+
+
+        details.appendChild(markParamContainer);
+
+        root.appendChild(container)
+
+    }
+
+
+}
+
+
+function addAMark() {
+
+    megaGlyph["new"] = {
+        dataColumn: "",
+        color: {
+            dataColumn: "",
+            scale: "ordinal",
+        },
+        size: {
+            dataColumn: "",
+            scale: "",
+        },
+        intensity: {
+            dataColumn: "",
+            scale: "",
+        }
+    }
+
+    makeMarkTree()
+
+
+}
+
+
+function cancelCollapse(e) {
+
+    // e.stopPropagation()
+
+    e.preventDefault()
+}
 
 function makeAxisMenu(keys, name, selected) {
     let options = ``

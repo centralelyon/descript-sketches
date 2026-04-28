@@ -255,6 +255,7 @@ function fillPalette(reset = false) {
     }
     // populateSelect()
     // updateLink2Palette()
+    drawSvg()
 }
 
 
@@ -1072,6 +1073,11 @@ function addAnchor() {
 }
 
 
+function clampVal(val, min, max) {
+
+    return Math.max(Math.min(val, max), min)
+}
+
 function setAnchorOnProto(e, el) {
 
     if (e.target.matches("canvas")) {
@@ -1086,12 +1092,22 @@ function setAnchorOnProto(e, el) {
 
 
         let selProto
-
+        let source
+        let scale = 1
 
         if (type === "range") {
             selProto = megaPalettes[key].encodings.range.marks[num].proto
+            source = megaPalettes[key].encodings.range.marks[num].source
+            if (megaPalettes[key].encodings.range.scale) {
+                scale = megaPalettes[key].encodings.range.scale
+            }
+
         } else if (type === "morph") {
             selProto = megaPalettes[key].encodings.morph[num].proto
+            source = megaPalettes[key].encodings.morph[num].source
+            if (megaPalettes[key].scale) {
+                scale = megaPalettes[key].encodings.morph.scale
+            }
         }
 
 
@@ -1099,27 +1115,62 @@ function setAnchorOnProto(e, el) {
         let th = selProto.corners[1][1] - selProto.corners[0][1]
 
 
+        let tx = xy.x
+        let ty = xy.y
+
+        if (source) {
+
+            if (source.width * scale < tw && source.height * scale < th) {
+
+                tx = clampVal(xy.x - tw / 2 + source.width / 2, 0, source.width)
+                ty = clampVal(xy.y - th / 2 + source.height / 2, 0, source.height)
+                // tx = (xy.x *source.width) / tw
+                // ty = (xy.y *source.height) / th
+
+            }
+            else {
+                console.log("heheheh");
+                // tx = clampVal(xy.x - tw / 2 + source.width / 2, 0, source.width)
+                // ty = clampVal(xy.y - th / 2 + source.height / 2, 0, source.height)
+
+
+                tx = clampVal(xy.x - tw / 2 + source.width / 2, 0, source.width)
+                ty = clampVal(xy.y - th / 2 + source.height / 2, 0, source.height)
+            }
+            tw = source.width *scale
+            th = source.height *scale
+        }
+
+
         if (selProto.anchors === undefined) {
             selProto.anchors = {}
         }
 
+
+        console.log(xy.x);
+
         selProto.anchors[currAnchor] = {
-            x: xy.x,
-            y: xy.y,
-            color: catColors[currAnchor],
-            rx: xy.x / trect.width,
-            ry: xy.y / trect.height,
-            px: (xy.x - trect.width / 2 + tw / 2),
-            py: (xy.y - trect.height / 2 + th / 2),
-            prx: (xy.x - trect.width / 2 + tw / 2) / trect.width,
-            pry: (xy.y - trect.height / 2 + th / 2) / trect.height,
+            x: tx,
+            y: ty,
+            rx: tx / tw,
+            ry: ty / th,
+
+
+            // px: (tx - tw / 2),
+            // py: (ty - th / 2),
+            // prx: (tx - tw / 2) / tw,
+            // pry: (ty - th / 2) / th,
         }
 
-        /*        let cont = selProto.canvas.getContext("2d")
-                cont.beginPath();
-                cont.arc(xy.x * tw, xy.y * th, 5, 0, 2 * Math.PI);
-                cont.closePath()
-                cont.fill();*/
+
+        console.log(selProto.anchors[currAnchor]);
+        console.log(source.width, source.height);
+
+        let cont = source.getContext("2d")
+        cont.beginPath();
+        cont.arc(selProto.anchors[currAnchor].x, selProto.anchors[currAnchor].y, 3, 0, 2 * Math.PI);
+        cont.closePath()
+        cont.fill();
 
 
         // if (type === "mark") {
@@ -1273,6 +1324,9 @@ function setMarkEvent(key, type) {
             if (value.source)
                 drawCanvasWithScale(value.source, value.proto.canvas, megaPalettes[key].encodings[type].scale)
         }
+
+
+        drawSvg()
 
 
     }

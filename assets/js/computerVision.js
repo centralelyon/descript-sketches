@@ -486,8 +486,11 @@ function getBBox(canvas) {
     for (let i = 0; i < contours2.size(); ++i) {
         hierarchy2
         if (hierarchy2.intPtr(0, i)[3] > 0) {
+            let tt = 0
 
-            let tt = opencv.contourArea(contours.get(i), false)
+            if (i < contours.size()) {
+                tt = opencv.contourArea(contours.get(i), false)
+            }
 
             if (tt > 1) {
                 const ci = contours2.get(i)
@@ -630,4 +633,129 @@ function otherGrab(can, coords) {
     fgdModel.delete();
 
     return can
+}
+
+
+function makeCanvasFit(canvas, can = undefined) {
+    let bbox = getBBox(canvas)
+
+    //small opti to prevent the re-creation of cans in mass calling
+    if (can === undefined) {
+        can = document.createElement("canvas")
+    }
+
+    let context = can.getContext("2d")
+    can.width = bbox[1][0] - bbox[0][0]
+    can.height = bbox[1][1] - bbox[0][1]
+    context.drawImage(canvas, bbox[0][0], bbox[0][1], can.width, can.height, 0, 0, can.width, can.height)
+
+    return can
+}
+
+
+function resizeWithBbox(canvas, bbox) {
+    let can = document.createElement("canvas")
+    let context = can.getContext("2d")
+    if (Array.isArray(bbox)) {
+
+        can.width = bbox[1][0] - bbox[0][0]
+        can.height = bbox[1][1] - bbox[0][1]
+        context.drawImage(canvas, bbox[0][0], bbox[0][1], can.width, can.height, 0, 0, can.width, can.height)
+    } else {
+        can.width = bbox.width
+        can.height = bbox.height
+        context.drawImage(canvas, bbox.x, bbox.y, can.width, can.height, 0, 0, can.width, can.height)
+    }
+    return can
+}
+
+function getMinimalBoundingBox(canvas, step = 4) {
+    const ctx = canvas.getContext("2d");
+    const w = canvas.width;
+    const h = canvas.height;
+
+    const {data} = ctx.getImageData(0, 0, w, h);
+
+    let top = 0, bottom = h - 1;
+    let left = 0, right = w - 1;
+
+    if (right < left || bottom < top) {
+        return null;
+    }
+
+    outerTop:
+        for (; top < h; top += step) {
+            for (let x = 0; x < w; x += step) {
+                if (data[((top * w + x) << 2) + 3] !== 0) break outerTop;
+            }
+        }
+    outerBottom:
+        for (; bottom >= top; bottom -= step) {
+            for (let x = 0; x < w; x += step) {
+                if (data[((bottom * w + x) << 2) + 3] !== 0) break outerBottom;
+            }
+        }
+
+    outerLeft:
+        for (; left < w; left += step) {
+            for (let y = top; y <= bottom; y += step) {
+                if (data[((y * w + left) << 2) + 3] !== 0) break outerLeft;
+            }
+        }
+
+    outerRight:
+        for (; right >= left; right -= step) {
+            for (let y = top; y <= bottom; y += step) {
+                if (data[((y * w + right) << 2) + 3] !== 0) break outerRight;
+            }
+        }
+
+    if (step > 1) {
+        // top
+        for (let y = Math.max(0, top - step); y < top; y++) {
+            for (let x = left; x <= right; x++) {
+                if (data[((y * w + x) << 2) + 3] !== 0) {
+                    top = y;
+                    break;
+                }
+            }
+        }
+
+        // bottom
+        for (let y = Math.min(h - 1, bottom + step); y > bottom; y--) {
+            for (let x = left; x <= right; x++) {
+                if (data[((y * w + x) << 2) + 3] !== 0) {
+                    bottom = y;
+                    break;
+                }
+            }
+        }
+
+        // left
+        for (let x = Math.max(0, left - step); x < left; x++) {
+            for (let y = top; y <= bottom; y++) {
+                if (data[((y * w + x) << 2) + 3] !== 0) {
+                    left = x;
+                    break;
+                }
+            }
+        }
+
+        // right
+        for (let x = Math.min(w - 1, right + step); x > right; x--) {
+            for (let y = top; y <= bottom; y++) {
+                if (data[((y * w + x) << 2) + 3] !== 0) {
+                    right = x;
+                    break;
+                }
+            }
+        }
+    }
+
+    return {
+        x: left,
+        y: top,
+        width: right - left + 1,
+        height: bottom - top + 1
+    };
 }

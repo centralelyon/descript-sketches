@@ -94,7 +94,7 @@
         <div class="ten columns " style="margin-left:1%">
 
             <canvas class="lightBorder" id="inVis"
-                    style="z-index: 99;display: inline-block"></canvas>
+                    style="z-index: 99;display: inline-block;border-radius:5px "></canvas>
             <div style="width: 60%;display: none">
 
                 <input id="imgUrl" style="width: 80%" placeholder="enter image url..." type="text" value="">
@@ -337,12 +337,67 @@
             </h3>
 
             <div style="display: flex">
-                <div id="fakeGrammar">
+                <div style="width:40% ;">
+                    <div>
+                        <h5> Chart Settings</h5>
+                        <div id="chartSettings"></div>
+                    </div>
+                    <div>
+                        <h5> Composition</h5>
+                        <div id="fakeGrammar"></div>
+                        <div id="markTreeList">
 
+
+                            <ul id="glyphTree" class="tree">
+
+                            </ul>
+
+
+                            <div style="width: 100%;">
+                                <div class="buttonImg">
+                                    <img src="assets/images/buttons/plus.png"
+                                         onclick="addAMark()" style=""/>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!--                        <div>
+                                                    <ul class="tree">
+                                                        <li>
+                                                            <details open>
+                                                                <summary>Giant planets</summary>
+                                                                <ul>
+                                                                    <li>
+                                                                        <details open>
+                                                                            <summary>Gas giants</summary>
+                                                                            <ul>
+                                                                                <li>Jupiter</li>
+                                                                                <li>Saturn</li>
+                                                                            </ul>
+                                                                        </details>
+                                                                    </li>
+                                                                    <li>
+                                                                        <details open>
+                                                                            <summary>Ice giants</summary>
+                                                                            <ul>
+                                                                                <li>Uranus</li>
+                                                                                <li>Neptune</li>
+                                                                            </ul>
+                                                                        </details>
+                                                                    </li>
+                                                                </ul>
+                                                            </details>
+                                                        </li>
+
+                                                    </ul>
+                                                </div>-->
+                    </div>
                 </div>
 
+
                 <div id="fakePreview">
-                    <svg id="fakePreviewSvg"> </svg>
+                    <svg id="fakePreviewSvg"></svg>
                 </div>
 
             </div>

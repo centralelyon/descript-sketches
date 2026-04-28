@@ -169,6 +169,9 @@ async function init() {
     document.getElementById("paletteLoader").addEventListener("change", importPalette);
 
 
+
+    document.getElementById("glyphTree").addEventListener("click",cancelCollapse)
+
 }
 
 

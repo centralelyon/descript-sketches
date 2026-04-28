@@ -77,6 +77,8 @@ function dragElement(elmnt) {
 
             }
 
+            drawSvg()
+
         }
     }
 }

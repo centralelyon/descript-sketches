@@ -548,8 +548,9 @@ table th {
     border-radius: 4px;
 }
 
+/*#chartSettings*/
 #fakeGrammar {
-    width: 40%;
+    width: 100%;
 }
 
 #fakePreview {
@@ -568,4 +569,125 @@ table th {
     display: flex;
     width: 100%;
 
+}
+
+
+/* ---------------- TREE STUFF -----------------------*/
+
+.tree {
+    --spacing: 4rem;
+    --radius: 5px;
+    width: 90%;
+    margin-left: -50px;
+}
+
+
+.tree li {
+    display: block;
+    position: relative;
+    padding-left: calc(2 * var(--spacing) - var(--radius) - 2px);
+    /*width: 100%;*/
+}
+
+.tree ul {
+    margin-left: calc(var(--radius) - var(--spacing));
+    padding-left: 0;
+}
+
+
+.tree ul li {
+    border-left: 2px solid #ddd;
+}
+
+.tree ul li:last-child {
+    border-color: transparent;
+}
+
+
+.tree ul li::before {
+    content: '';
+    display: block;
+    position: absolute;
+    top: calc(var(--spacing) / -1);
+    left: -2px;
+    width: calc(var(--spacing) + 30px);
+    height: calc(var(--spacing) + 24px);
+    border: solid #ddd;
+    border-width: 0 0 2px 2px;
+}
+
+.tree summary {
+    display: block;
+    cursor: pointer;
+}
+
+.tree summary::marker,
+.tree summary::-webkit-details-marker {
+    display: none;
+}
+
+.tree summary:focus {
+    outline: none;
+}
+
+.tree summary:focus-visible {
+    outline: 1px dotted #000;
+}
+
+.tree li summary::after {
+    display: none;
+}
+
+/*.tree li::after {
+    content: '';
+    display: block;
+    position: absolute;
+    top: calc(var(--spacing) / 2 - var(--radius) + 4px);
+    left: calc(var(--spacing) - var(--radius) + 29px);
+    width: calc(2 * var(--radius));
+    height: calc(2 * var(--radius));
+    border-radius: 50%;
+    background: #ddd;
+}*/
+
+.tree summary::before {
+    content: '';
+    display: block;
+    position: absolute;
+    top: 9px;
+    /*top: calc(var(--spacing) / 2 - var(--radius)+ (-4px));*/
+    left: calc(var(--spacing) - var(--radius) + (-1px));
+    width: calc(2 * var(--radius));
+    height: calc(2 * var(--radius));
+    border-radius: 50%;
+    background: #ddd;
+}
+
+li .fakeGrammarRow {
+    /*margin-left: -2rem;*/
+    /*margin-top: 5px ;*/
+}
+
+.fakeGrammarRow p {
+    margin-top: 9px;
+    margin-right: 6px;
+}
+
+.fakeGrammarRow select {
+    margin-top: 5px;
+    margin-right: 6px;
+}
+
+.fakeGrammarTitleMark {
+    position: absolute;
+    font-weight: 600;
+    top: -27px;
+    left: 85px;
+}
+
+.fakeGrammarTitleData {
+    position: absolute;
+    font-weight: 600;
+    top: -27px;
+    left: 240px;
 }

@@ -61,7 +61,6 @@ function makeCartesian() {
 
 
                 let mark = ref.encodings.range.marks[test[i][j]]
-                let tprot = mark.proto
 
                 let sc = 1
                 if (ref.encodings.range.scale) {
@@ -188,9 +187,8 @@ function makeMorph(palette, data, column) {
     return {scale: sizeScale, can: pal.encodings.morph.max.proto.canvas}
 }
 
-function makeCollageFromData(palettes, marks, row) {
+function makeCollageFromData(palettes, order, marks, row) {
 
-    let order = getOrder(palettes)
 
     let drawnMarks = {}
 
@@ -210,10 +208,8 @@ function makeCollageFromData(palettes, marks, row) {
 
         if (ref.displayType === "range") {
 
-
             let mark = marks[order[j]][row[dataBinding[order[j]]]];
 
-            console.log(mark);
             let sc = 1
             if (ref.encodings.range.scale) {
                 sc = ref.encodings.range.scale
@@ -231,46 +227,47 @@ function makeCollageFromData(palettes, marks, row) {
 
                 let to = megaPalettes[ref.apply]
 
+                //WHERE PREVIOUS WAS DRAWN
                 offX = drawnMarks[ref.apply].x
                 offY = drawnMarks[ref.apply].y
 
                 let selfAnchor = mark.proto.anchors[anchorId]
 
-                offX += selfAnchor.x
-                offY += selfAnchor.y
+                offX += selfAnchor.rx * sourceW
+                offY += selfAnchor.ry * sourceH
 
                 if (to.displayType === "range") {
-                    console.log(marks[ref.apply]);
-                    console.log(row[dataBinding[ref.apply]]);
                     let instancedMark = marks[ref.apply][row[dataBinding[ref.apply]]]
                     let ToAnchor = instancedMark.proto.anchors[anchorId]
-
-                    offX -= ToAnchor.x
-                    offY -= ToAnchor.y
+                    let tsc = 1
+                    if (instancedMark.scale) {
+                        tsc = instancedMark.scale
+                    }
+                    offX -= ToAnchor.rx * (instancedMark.source.width * tsc)
+                    offY -= ToAnchor.ry * (instancedMark.source.height * tsc)
 
                 }
-
-
             }
 
-
-            // console.log(fr, to)
-            console.log(offX, offY)
-
-            drawnMarks[order[j]] = {x: offX, y: offY}
-
+            drawnMarks[order[j]] = {x: offX, y: offY, w: sourceW, h: sourceH}
             tcon.drawImage(mark.source, offX - sourceW / 2, offY - sourceH / 2, sourceW, sourceH)
 
         }
-
-        console.log(drawnMarks);
+        // console.log(drawnMarks);
 
 
     }
-    return tcan
+
+
+    // return makeCanvasFit(tcan)
+
+    let bbox = getMinimalBoundingBox(tcan)
+
+    return resizeWithBbox(tcan, bbox)
+
+    // tcan
 
 }
-
 
 function getMarkId(name, order, test) {
 
@@ -278,14 +275,10 @@ function getMarkId(name, order, test) {
 
 }
 
-const cartesian = (...a) => a.reduce((a, b) => a.flatMap(d => b.map(e => [d, e].flat())));
-
-
-function cartesianProduct(a) { // a = array of array
-    var i, j, l, m, a1, o = [];
+function cartesianProduct(a) {
+    let i, j, l, m, a1, o = [];
     if (!a || a.length == 0) return a;
 
-    a1 = a.splice(0, 1)[0]; // the first array of a
     a = cartesianProduct(a);
     for (i = 0, l = a1.length; i < l; i++) {
         if (a && a.length)

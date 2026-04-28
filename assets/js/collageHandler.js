@@ -694,7 +694,6 @@ function pairsToIndex(pairs) {
 }
 
 function listNode(node) {
-    console.log(node);
     return Array.prototype.concat.apply([node.key], node.children.map(listNode));
 
 }
