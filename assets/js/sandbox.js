@@ -7,6 +7,8 @@ let chartAxis = {
 }
 
 
+let gridMod = false
+
 const datasetList = ["pinguin"]
 
 let megaGlyph = {}
@@ -65,6 +67,17 @@ async function loadDataset(url) {
         data.splice(338, 1)
     }
     chartDataset.data = data
+}
+
+
+function isCont(data, column) {
+    let allVals = [...new Set(data.map(d => d[column]))]
+    console.log(allVals);
+    if (allVals.length > data.length * 0.1) {
+        return true
+    } else {
+        return false
+    }
 }
 
 async function drawSvg() {
@@ -131,19 +144,148 @@ async function drawSvg() {
                 marks[NaN] = {source: defaultCont}
                 marks[null] = {source: defaultCont}
 
-                console.log(marks);
 
-                svg.selectAll("dots")
-                    .data(data)
-                    .enter()
-                    .append("image")
-                    .attr("xlink:href", d => marks[d[dataBinding[encodings[0]]]].source.toDataURL("image/png"))
-                    .attr("x", d => xScale(d[chartAxis.x]))
-                    .attr("y", d => yScale(d[chartAxis.y]))
-                    .attr("width", d => marks[d[dataBinding[encodings[0]]]].source.width)
-                    .attr("height", d => marks[d[dataBinding[encodings[0]]]].source.height)
+                let useColor = false
+                let useMorph = false
 
 
+                let useDatCol = ""
+                let useDatMorph = ""
+
+                let lin = false
+
+                let colScale
+                let linScale
+
+                if (megaGlyph[encodings[0]].color) {
+                    if (megaGlyph[encodings[0]].color.dataColumn !== "") {
+                        useDatCol = megaGlyph[encodings[0]].color.dataColumn
+                        useColor = true
+
+                        if (isCont(data, useDatCol)) {
+                            lin = true
+                            linScale = d3.scaleLinear(d3.extent(data.map(d => d[useDatCol])), [0, 1])
+                            colScale = d3.interpolateRdYlBu
+                        } else {
+                            colScale = d3.scaleOrdinal(d3.schemeAccent);
+                        }
+                    }
+                }
+
+                if (megaGlyph[encodings[0]].size) {
+                    if (megaGlyph[encodings[0]].size.dataColumn !== "") {
+                        useDatMorph = megaGlyph[encodings[0]].size.dataColumn
+                        useMorph = true
+                        if (isCont(data, useDatCol)) {
+                            lin = true
+
+                            if (megaPalettes[encodings[0]].encodings.morph) {
+                                if (megaPalettes[encodings[0]].encodings.morph.min !== 0) {
+
+                                    let bounds = [megaPalettes[encodings[0]].encodings.morph.min.proto.canvas.width,
+                                        megaPalettes[encodings[0]].encodings.morph.max.proto.canvas.width]
+                                    linScale = d3.scaleLinear(d3.extent(data.map(d => d[useDatCol])), bounds)
+                                }
+                            }
+
+                        }
+
+
+                    }
+                }
+
+                if (gridMod) {
+
+                    let xCumul = 5
+                    let yCumul = 5
+
+                    let width = 700
+
+                    for (let i = 0; i < data.length; i++) {
+
+                        let d = data[i]
+                        let can = marks[d[dataBinding[encodings[0]]]].source
+                        let cl = 1
+                        if (useColor) {
+
+                            if (lin) {
+                                let tcol = colScale(linScale(d[useDatCol])).replace("rgb(", "").replace(")", "").split(",")
+                                can = toColor(can, +tcol[0] * cl, +tcol[1] * cl, +tcol[2] * cl, 210)
+                            } else {
+                                let tcol = hexToRgb(colScale(d[useDatCol]))
+                                can = toColor(can, tcol.r * cl, tcol.g * cl, tcol.b * cl, 210)
+
+                            }
+
+                            removeColor(230, 230, 230, can, 25)
+
+
+                        }
+
+
+                        let tw = can.width
+                        let th = can.height
+
+
+                        svg.append("image")
+                            .attr("xlink:href", can.toDataURL("image/png"))
+                            .attr("x", xCumul)
+                            .attr("y", yCumul)
+                            .attr("width", tw)
+                            .attr("height", th)
+
+                        xCumul += tw
+                        if (xCumul + tw > width) {
+                            yCumul += th
+                            xCumul = 5
+                        }
+
+
+                    }
+                } else {
+
+
+                    svg.selectAll("dots")
+                        .data(data)
+                        .enter()
+                        .append("image")
+                        .attr("xlink:href", d => {
+                            let can = marks[d[dataBinding[encodings[0]]]].source
+                            let cl = 1
+                            if (useColor) {
+
+                                if (lin) {
+                                    let tcol = colScale(linScale(d[useDatCol])).replace("rgb(", "").replace(")", "").split(",")
+
+                                    console.log(tcol);
+                                    can = toColor(can, +tcol[0] * cl, +tcol[1] * cl, +tcol[2] * cl, 210)
+                                } else {
+                                    let tcol = hexToRgb(colScale(d[useDatCol]))
+                                    can = toColor(can, tcol.r * cl, tcol.g * cl, tcol.b * cl, 210)
+
+                                }
+
+                                removeColor(230, 230, 230, can, 25)
+                            }
+                            return can.toDataURL("image/png")
+
+                        })
+                        .attr("x", (d, i) => {
+
+                            return xScale(d[chartAxis.x])
+
+
+                        })
+                        .attr("y", (d, i) => {
+
+                                return yScale(d[chartAxis.y])
+
+                            }
+                        )
+                        .attr("width", d => marks[d[dataBinding[encodings[0]]]].source.width)
+                        .attr("height", d => marks[d[dataBinding[encodings[0]]]].source.height)
+
+                }
             } else if (pal.displayType === "morph") {
 
                 let sizeScale = d3.scaleLinear(d3.extent(data.map(d => d[dataBinding[encodings[0]]])), [pal.encodings.morph.min.proto.size[0], pal.encodings.morph.max.proto.size[0]])
@@ -170,17 +312,53 @@ async function drawSvg() {
         let tmarks = makeMarks(encodings, data)
 
         let order = getOrder(encodings)
+        if (gridMod) {
 
-        svg.selectAll("dots")
-            .data(data)
-            .enter()
-            .append("image")
-            .attr("xlink:href", d =>
-                makeCollageFromData(encodings, order, tmarks, d).toDataURL("image/png"))
-            .attr("x", d => xScale(d[chartAxis.x]))
-            .attr("y", d => yScale(d[chartAxis.y]))
+            let xCumul = 5
+            let yCumul = 5
 
-        //TODO: here generate glyphs WRT data and use it as a single image
+            let width = 700
+
+            for (let i = 0; i < data.length; i++) {
+
+                let d = data[i]
+
+                let can = makeCollageFromData(encodings, order, tmarks, d)
+
+
+
+                let tw = can.width
+                let th = can.height
+
+
+                svg.append("image")
+                    .attr("xlink:href", can.toDataURL("image/png"))
+                    .attr("x", xCumul)
+                    .attr("y", yCumul)
+                    .attr("width", tw)
+                    .attr("height", th)
+
+                xCumul += tw
+                if (xCumul + tw > width) {
+                    yCumul += th
+                    xCumul = 5
+                }
+
+            }
+        } else {
+
+
+            svg.selectAll("dots")
+                .data(data)
+                .enter()
+                .append("image")
+                .attr("xlink:href", d =>
+                    makeCollageFromData(encodings, order, tmarks, d).toDataURL("image/png"))
+                .attr("x", d => xScale(d[chartAxis.x]))
+                .attr("y", d => yScale(d[chartAxis.y]))
+
+
+        }
     }
 
     populateSandboxMenu(data)
@@ -248,6 +426,7 @@ function makePaletteMenu(palettes, name = undefined) {
         delete megaGlyph[prev];
 
         makeMarkTree()
+        drawSvg()
     }
 
     return select;
@@ -545,3 +724,9 @@ function getKeyByValue(object, value) {
     return Object.keys(object).find(key => object[key] === value);
 }
 
+
+function switchGrid() {
+
+    gridMod = !gridMod;
+    drawSvg()
+}

@@ -649,21 +649,21 @@ function getRelationships(drawingData) {
         }
     }
 
-/*
-    for (const [key, value] of Object.entries(primitive)) {
-        let t = getFromTo(key, drawingData, value)
-        if (t) {
-            res.push(t)
+    /*
+        for (const [key, value] of Object.entries(primitive)) {
+            let t = getFromTo(key, drawingData, value)
+            if (t) {
+                res.push(t)
+            }
         }
-    }
 
-    for (const [key, value] of Object.entries(palette_cat)) {
-        let t = getFromTo(key, drawingData, value)
-        if (t) {
-            res.push(t)
+        for (const [key, value] of Object.entries(palette_cat)) {
+            let t = getFromTo(key, drawingData, value)
+            if (t) {
+                res.push(t)
+            }
         }
-    }
-*/
+    */
 
     return res
 }

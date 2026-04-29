@@ -250,6 +250,9 @@ function makeCollageFromData(palettes, order, marks, row) {
             }
 
             drawnMarks[order[j]] = {x: offX, y: offY, w: sourceW, h: sourceH}
+
+
+
             tcon.drawImage(mark.source, offX - sourceW / 2, offY - sourceH / 2, sourceW, sourceH)
 
         }
