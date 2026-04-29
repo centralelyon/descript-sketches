@@ -153,9 +153,11 @@ async function drawSvg() {
                 let useDatMorph = ""
 
                 let lin = false
+                let mlin = false
 
                 let colScale
                 let linScale
+                let morphScale
 
                 if (megaGlyph[encodings[0]].color) {
                     if (megaGlyph[encodings[0]].color.dataColumn !== "") {
@@ -173,18 +175,23 @@ async function drawSvg() {
                 }
 
                 if (megaGlyph[encodings[0]].size) {
+
                     if (megaGlyph[encodings[0]].size.dataColumn !== "") {
+
                         useDatMorph = megaGlyph[encodings[0]].size.dataColumn
                         useMorph = true
-                        if (isCont(data, useDatCol)) {
-                            lin = true
-
+                        if (isCont(data, useDatMorph)) {
+                            mlin = true
+                            console.log(megaPalettes[encodings[0]].encodings.morph)
                             if (megaPalettes[encodings[0]].encodings.morph) {
                                 if (megaPalettes[encodings[0]].encodings.morph.min !== 0) {
 
                                     let bounds = [megaPalettes[encodings[0]].encodings.morph.min.proto.canvas.width,
                                         megaPalettes[encodings[0]].encodings.morph.max.proto.canvas.width]
-                                    linScale = d3.scaleLinear(d3.extent(data.map(d => d[useDatCol])), bounds)
+                                    morphScale = d3.scaleLinear(d3.extent(data.map(d => d[useDatMorph])), bounds)
+                                } else {
+                                    let bounds = [0.2, 2]
+                                    morphScale = d3.scaleLinear(d3.extent(data.map(d => d[useDatMorph])), bounds)
                                 }
                             }
 
@@ -193,6 +200,7 @@ async function drawSvg() {
 
                     }
                 }
+
 
                 if (gridMod) {
 
@@ -222,9 +230,18 @@ async function drawSvg() {
 
                         }
 
-
                         let tw = can.width
                         let th = can.height
+
+                        if (useDatMorph) {
+                            let tval = d[useDatMorph]
+
+
+                            if (morphScale(tval) !== undefined) {
+                                tw = tw * morphScale(tval)
+                                th = th * morphScale(tval)
+                            }
+                        }
 
 
                         svg.append("image")
@@ -234,9 +251,11 @@ async function drawSvg() {
                             .attr("width", tw)
                             .attr("height", th)
 
-                        xCumul += tw
+
+
+                        xCumul += Math.max(tw, can.width)
                         if (xCumul + tw > width) {
-                            yCumul += th
+                            yCumul += Math.max(th, can.height)
                             xCumul = 5
                         }
 
@@ -257,12 +276,10 @@ async function drawSvg() {
                                 if (lin) {
                                     let tcol = colScale(linScale(d[useDatCol])).replace("rgb(", "").replace(")", "").split(",")
 
-                                    console.log(tcol);
                                     can = toColor(can, +tcol[0] * cl, +tcol[1] * cl, +tcol[2] * cl, 210)
                                 } else {
                                     let tcol = hexToRgb(colScale(d[useDatCol]))
                                     can = toColor(can, tcol.r * cl, tcol.g * cl, tcol.b * cl, 210)
-
                                 }
 
                                 removeColor(230, 230, 230, can, 25)
@@ -271,19 +288,30 @@ async function drawSvg() {
 
                         })
                         .attr("x", (d, i) => {
-
                             return xScale(d[chartAxis.x])
+                        })
+                        .attr("y", (d, i) => {
+                                return yScale(d[chartAxis.y])
+                            }
+                        )
+                        .attr("width", d => {
+                            if (useMorph) {
+                                return marks[d[dataBinding[encodings[0]]]].source.width * morphScale(d[useDatMorph])
+                            } else {
+                                return marks[d[dataBinding[encodings[0]]]].source.width
+                            }
 
 
                         })
-                        .attr("y", (d, i) => {
-
-                                return yScale(d[chartAxis.y])
-
+                        .attr("height", d => {
+                            if (useMorph) {
+                                return marks[d[dataBinding[encodings[0]]]].source.height * morphScale(d[useDatMorph])
+                            } else {
+                                return marks[d[dataBinding[encodings[0]]]].source.height
                             }
-                        )
-                        .attr("width", d => marks[d[dataBinding[encodings[0]]]].source.width)
-                        .attr("height", d => marks[d[dataBinding[encodings[0]]]].source.height)
+
+
+                        })
 
                 }
             } else if (pal.displayType === "morph") {
@@ -326,10 +354,8 @@ async function drawSvg() {
                 let can = makeCollageFromData(encodings, order, tmarks, d)
 
 
-
                 let tw = can.width
                 let th = can.height
-
 
                 svg.append("image")
                     .attr("xlink:href", can.toDataURL("image/png"))
