@@ -187,7 +187,7 @@ function makeMorph(palette, data, column) {
     return {scale: sizeScale, can: pal.encodings.morph.max.proto.canvas}
 }
 
-function makeCollageFromData(palettes, order, marks, row) {
+function makeCollageFromData(palettes, order, marks, row, color = undefined, size = undefined) {
 
 
     let drawnMarks = {}
@@ -201,14 +201,34 @@ function makeCollageFromData(palettes, order, marks, row) {
     let tcon = tcan.getContext("2d");
 
     let base = [tcan.width / 2, tcan.height / 2]
+    let colScales = {}
 
     for (let j = 0; j < order.length; j++) {
 
+
         let ref = megaPalettes[order[j]]
+
 
         if (ref.displayType === "range") {
 
             let mark = marks[order[j]][row[dataBinding[order[j]]]];
+
+
+            let can = mark.source
+            let cl = 1
+
+            if (megaGlyph[order[j]].color.dataColumn !== "" && megaGlyph[order[j]].color.dataColumn !== "none") {
+                if (megaGlyph[order[j]].color.isLinear) {
+                    let tcol = megaGlyph[order[j]].color.colorScale(megaGlyph[order[j]].color.linearScale(row[megaGlyph[order[j]].color.dataColumn])).replace("rgb(", "").replace(")", "").split(",")
+                    can = toColor(can, +tcol[0] * cl, +tcol[1] * cl, +tcol[2] * cl, 210)
+                } else {
+                    let tcol = hexToRgb(megaGlyph[order[j]].color.colorScale(row[megaGlyph[order[j]].color.dataColumn]))
+                    can = toColor(can, tcol.r * cl, tcol.g * cl, tcol.b * cl, 210)
+                }
+                removeColor(230, 230, 230, can, 25)
+
+            }
+
 
             let sc = 1
             if (ref.encodings.range.scale) {
@@ -252,8 +272,8 @@ function makeCollageFromData(palettes, order, marks, row) {
             drawnMarks[order[j]] = {x: offX, y: offY, w: sourceW, h: sourceH}
 
 
-
-            tcon.drawImage(mark.source, offX - sourceW / 2, offY - sourceH / 2, sourceW, sourceH)
+            // tcon.drawImage(mark.source, offX - sourceW / 2, offY - sourceH / 2, sourceW, sourceH)
+            tcon.drawImage(can, offX - sourceW / 2, offY - sourceH / 2, sourceW, sourceH)
 
         }
         // console.log(drawnMarks);

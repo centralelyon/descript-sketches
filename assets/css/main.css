@@ -568,6 +568,7 @@ table th {
 .fakeGrammarRow {
     display: flex;
     width: 100%;
+    flex-wrap: wrap;
 
 }
 
@@ -690,4 +691,39 @@ li .fakeGrammarRow {
     font-weight: 600;
     top: -27px;
     left: 240px;
+}
+
+
+.colorRampCan {
+    border: 1px solid #777;
+    border-radius: 4px;
+    width: 190px;
+    height: 15px;
+    margin-left: 35px;
+}
+
+.colorRamp {
+    display: flex
+
+}
+
+.colorRamp div {
+    width: 25px;
+}
+
+.colorRamp p {
+    display: flex;
+    margin-bottom: -11px ;
+}
+.colorRamp span {
+    width: 15px;
+    height: 15px;
+    border: 1px solid #777;
+    border-radius: 4px;
+    display: block;
+}
+
+.rampLabel {
+    position: absolute;
+    top: 27px;
 }

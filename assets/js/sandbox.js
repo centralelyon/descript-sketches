@@ -6,6 +6,9 @@ let chartAxis = {
     y: "body_mass_g"
 }
 
+const defaultMinColor = "#a50026"
+const defaultMaxColor = "#313695"
+
 
 let gridMod = false
 
@@ -134,10 +137,7 @@ async function drawSvg() {
                         } else {
                             marks[allVals[i]] = pal.encodings.range.marks[markKeys[0]] //todo: set a default visual when no encoding is provided
                         }
-
                     }
-
-
                 }
 
                 marks[undefined] = {source: defaultCont}
@@ -160,7 +160,7 @@ async function drawSvg() {
                 let morphScale
 
                 if (megaGlyph[encodings[0]].color) {
-                    if (megaGlyph[encodings[0]].color.dataColumn !== "") {
+                    if (megaGlyph[encodings[0]].color.dataColumn !== "none" && megaGlyph[encodings[0]].color.dataColumn !== "") {
                         useDatCol = megaGlyph[encodings[0]].color.dataColumn
                         useColor = true
 
@@ -250,7 +250,6 @@ async function drawSvg() {
                             .attr("y", yCumul)
                             .attr("width", tw)
                             .attr("height", th)
-
 
 
                         xCumul += Math.max(tw, can.width)
@@ -372,8 +371,12 @@ async function drawSvg() {
 
             }
         } else {
+            let allColScales = {}
 
-
+            for (let i = 0; i < encodings.length; i++) {
+                allColScales[encodings[i]] = {}
+            }
+            //TODO: here use makeColorScale(data, palette) and make dicts for each palette
             svg.selectAll("dots")
                 .data(data)
                 .enter()
@@ -388,6 +391,56 @@ async function drawSvg() {
     }
 
     populateSandboxMenu(data)
+}
+
+function makeContColorRamp(palette) {
+
+
+    let cont = document.createElement('div')
+
+    cont.classList.add('colorRamp')
+
+    cont.innerHTML = `<div class="rampLabel" style="left: 85px"><p>min<p><span style="background-color:${palette.colors[0][0]} "></span></div> <div class="rampLabel" style="left: 306px"><p>max<p><span style="background-color:${palette.colors[1][1]}"></span></div>`
+
+    let tcan = document.createElement('canvas')
+    tcan.width = 190
+    tcan.height = 15
+
+    tcan.classList.add("colorRampCan")
+
+
+
+    cont.appendChild(tcan)
+
+    // context.fillStyle = "red";
+    // context.fillRect(0, 0, 190, 990);
+
+// let tbbox = tcan.getBoundingClientRect()
+// console.log(tbbox);
+
+    // cont.innerHTML += ``
+
+    ramp(tcan, palette.colorScale)
+
+    return cont
+
+}
+
+
+function ramp(can, colorScale, n = 400) {
+
+    const context = can.getContext("2d");
+    can.style.imageRendering = "-moz-crisp-edges";
+    can.style.imageRendering = "pixelated";
+    let w = can.width / n
+    for (let i = 0; i < n; ++i) {
+        console.log(i * w, 0, w, can.height)
+        context.fillStyle = colorScale(i / (n - 1));
+        // context.fillStyle = "red";
+        context.fillRect(i * w, 0, w, can.height);
+    }
+
+
 }
 
 
@@ -505,10 +558,24 @@ function makeDataColumnMenu(columns, name, selected, mode = "palette") {
 
             if (megaGlyph[palette]) {
 
+
                 if (megaGlyph[palette][mode]) {
-                    megaGlyph[palette][mode].dataColumn = tval
+                    if (mode === "color") {
+
+                        megaGlyph[palette][mode] = makeColorScale(palette, tval)
+                        select.parentElement.appendChild(makeContColorRamp(megaGlyph[palette].color))
+
+                    } else {
+                        megaGlyph[palette][mode].dataColumn = tval
+                    }
                 } else {
-                    megaGlyph[palette][mode] = {dataColumn: tval}
+                    if (mode === "color") {
+
+                        megaGlyph[palette][mode] = makeColorScale(palette, tval)
+                    } else {
+                        megaGlyph[palette][mode] = {dataColumn: tval}
+                    }
+
                 }
             } else {
                 megaGlyph[palette] = {
@@ -519,9 +586,55 @@ function makeDataColumnMenu(columns, name, selected, mode = "palette") {
             drawSvg()
 
         }
+
+
     }
 
     return select;
+}
+
+
+function makeColorScale(palette, tval) {
+    // let colorScale =
+
+    if (!megaGlyph[palette].color) {
+        megaGlyph[palette].color = {
+            isLinear: false,
+            linearScale: undefined,
+            colorScale: d3.scaleOrdinal(d3.schemeAccent),
+            colors: [
+                {0: defaultMinColor, at: 0},
+                {1: defaultMaxColor, at: 1}
+            ],
+            dataColumn: tval
+        }
+    } else {
+        megaGlyph[palette].color.dataColumn = tval
+    }
+
+    if (megaGlyph[palette].color.dataColumn !== "none" && megaGlyph[palette].color.dataColumn !== "") {
+        let useDatCol = megaGlyph[palette].color.dataColumn
+
+
+        if (isCont(chartDataset.data, useDatCol)) {
+
+            megaGlyph[palette].color.isLinear = true
+            megaGlyph[palette].color.linearScale = d3.scaleLinear(d3.extent(chartDataset.data.map(d => d[useDatCol])), [0, 1])
+            megaGlyph[palette].color.colorScale = d3.interpolateRdYlBu
+            megaGlyph[palette].color.colors = [
+                {0: megaGlyph[palette].color.colorScale(0), at: 0},
+                {1: megaGlyph[palette].color.colorScale(1), at: 1}
+            ]
+        } else {
+
+
+            megaGlyph[palette].color.colorScale = d3.scaleOrdinal(d3.schemeAccent);
+        }
+
+
+    }
+
+    return megaGlyph[palette].color;
 }
 
 
