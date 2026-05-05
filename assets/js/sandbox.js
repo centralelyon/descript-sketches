@@ -75,7 +75,7 @@ async function loadDataset(url) {
 
 function isCont(data, column) {
     let allVals = [...new Set(data.map(d => d[column]))]
-    console.log(allVals);
+
     if (allVals.length > data.length * 0.1) {
         return true
     } else {
@@ -104,12 +104,39 @@ async function drawSvg() {
     console.log(encodings);
     if (encodings.length === 0) {
 
+        let useColor = false
+
+        if (megaGlyph["new"]) {
+            if (megaGlyph["new"].color) {
+                if (megaGlyph["new"].color.dataColumn !== "" && megaGlyph["new"].color.dataColumn != "none") {
+                    useColor = true
+                }
+            }
+        }
+
+
         svg.selectAll("dots")
             .data(data)
             .enter()
             .append("circle")
             .attr("cx", d => xScale(d[chartAxis.x]))
             .attr("cy", d => yScale(d[chartAxis.y]))
+            .style("fill", (d, i) => {
+                if (useColor) {
+                    if (megaGlyph["new"].color.isLinear) {
+                        return megaGlyph["new"].color.colorScale(megaGlyph["new"].color.linearScale(d[megaGlyph["new"].color.dataColumn]))
+                    } else {
+                        if (megaGlyph["new"].color.colors[d[megaGlyph["new"].color.dataColumn]]) {
+                            return megaGlyph["new"].color.colors[d[megaGlyph["new"].color.dataColumn]]
+                        } else {
+                            return megaGlyph["new"].color.colors["default"]
+                        }
+                    }
+
+                }
+
+
+            })
             .attr("r", 5)
 
     } else if (encodings.length === 1) {
@@ -167,9 +194,10 @@ async function drawSvg() {
                         if (isCont(data, useDatCol)) {
                             lin = true
                             linScale = d3.scaleLinear(d3.extent(data.map(d => d[useDatCol])), [0, 1])
-                            colScale = d3.interpolateRdYlBu
+                            // colScale = d3.interpolateRdYlBu
+                            colScale = megaGlyph[encodings[0]].color.colorScale
                         } else {
-                            colScale = d3.scaleOrdinal(d3.schemeAccent);
+                            colScale = megaGlyph[encodings[0]].color.colors
                         }
                     }
                 }
@@ -220,7 +248,11 @@ async function drawSvg() {
                                 let tcol = colScale(linScale(d[useDatCol])).replace("rgb(", "").replace(")", "").split(",")
                                 can = toColor(can, +tcol[0] * cl, +tcol[1] * cl, +tcol[2] * cl, 210)
                             } else {
-                                let tcol = hexToRgb(colScale(d[useDatCol]))
+                                let tt = colScale["default"]
+                                if (colScale[d[useDatCol]]) {
+                                    tt = colScale[d[useDatCol]]
+                                }
+                                let tcol = hexToRgb(tt)
                                 can = toColor(can, tcol.r * cl, tcol.g * cl, tcol.b * cl, 210)
 
                             }
@@ -277,7 +309,9 @@ async function drawSvg() {
 
                                     can = toColor(can, +tcol[0] * cl, +tcol[1] * cl, +tcol[2] * cl, 210)
                                 } else {
-                                    let tcol = hexToRgb(colScale(d[useDatCol]))
+                                    let tcol = hexToRgb(colScale["default"])
+                                    if (colScale[d[useDatCol]])
+                                        tcol = hexToRgb(colScale[d[useDatCol]])
                                     can = toColor(can, tcol.r * cl, tcol.g * cl, tcol.b * cl, 210)
                                 }
 
@@ -333,6 +367,8 @@ async function drawSvg() {
 
             }
 
+        } else {
+            console.log("dadasda");
         }
     } else {
 
@@ -395,12 +431,28 @@ async function drawSvg() {
 
 function makeContColorRamp(palette) {
 
-
     let cont = document.createElement('div')
 
     cont.classList.add('colorRamp')
 
-    cont.innerHTML = `<div class="rampLabel" style="left: 85px"><p>min<p><span style="background-color:${palette.colors[0][0]} "></span></div> <div class="rampLabel" style="left: 306px"><p>max<p><span style="background-color:${palette.colors[1][1]}"></span></div>`
+    let minDiv = document.createElement('div')
+    // minDiv.setAttribute('id', `${palette}_minRamp`)
+    minDiv.setAttribute('class', `rampLabel`)
+    minDiv.style.left = "85px"
+
+    minDiv.innerHTML = `<p>min</p><span style="background-color:${palette.colors[0][0]} "></span>`
+
+
+    let maxDiv = document.createElement('div')
+    // maxDiv.setAttribute('id', `${palette}_maxRamp`)
+    maxDiv.setAttribute('class', `rampLabel`)
+    maxDiv.style.left = "306px"
+
+    maxDiv.innerHTML = `<p>max</p><span style="background-color:${palette.colors[1][1]}"></span>`
+
+    cont.appendChild(minDiv)
+    cont.appendChild(maxDiv)
+    // cont.innerHTML = `<div id="${palette}_minRamp" class="rampLabel" style="left: 85px"></div> <div id="${palette}_maxRamp" class="rampLabel" style="left: 306px"><p>max<p><span style="background-color:${palette.colors[1][1]}"></span></div>`
 
     let tcan = document.createElement('canvas')
     tcan.width = 190
@@ -409,16 +461,11 @@ function makeContColorRamp(palette) {
     tcan.classList.add("colorRampCan")
 
 
-
     cont.appendChild(tcan)
 
-    // context.fillStyle = "red";
-    // context.fillRect(0, 0, 190, 990);
-
-// let tbbox = tcan.getBoundingClientRect()
-// console.log(tbbox);
-
-    // cont.innerHTML += ``
+    console.log(maxDiv);
+    console.log(minDiv);
+    setMinMaxPicker(palette, minDiv, maxDiv, tcan)
 
     ramp(tcan, palette.colorScale)
 
@@ -426,6 +473,85 @@ function makeContColorRamp(palette) {
 
 }
 
+function setOrdinalPicker(palette, div, key) {
+    let tcolpick = document.createElement("input")
+
+    tcolpick.type = "color"
+    tcolpick.id = "tcolpick"
+    tcolpick.style.display = "none"
+
+    div.onclick = function (e) {
+        tcolpick.value = palette.colors[key]
+        tcolpick.style.display = "inline-block"
+        tcolpick.click()
+        tcolpick.onchange = function () {
+
+            palette.colors[key] = tcolpick.value
+
+            div.children[1].style.backgroundColor = `${palette.colors[key]}`
+            palette.colors[key] = tcolpick.value
+            // ramp(tcan, palette.colorScale)
+
+            drawSvg()
+            tcolpick.remove()
+        }
+    }
+}
+
+
+function setMinMaxPicker(palette, minDiv, maxDiv, tcan) {
+
+    let tcolpick = document.createElement("input")
+
+    tcolpick.type = "color"
+    tcolpick.id = "tcolpick"
+    tcolpick.style.display = "none"
+
+    minDiv.onclick = function (e) {
+
+        tcolpick.value = palette.colors[0][0]
+        tcolpick.style.display = "inline-block"
+        tcolpick.click()
+
+        tcolpick.onchange = function () {
+
+            palette.colors[0][0] = tcolpick.value
+
+            minDiv.children[1].style.backgroundColor = `${palette.colors[0][0]}`
+            palette.colorScale = d3.interpolateLab(palette.colors[0][0], palette.colors[1][1])
+            ramp(tcan, palette.colorScale)
+            drawSvg()
+            tcolpick.remove()
+        }
+    }
+
+
+    if (maxDiv !== undefined) {
+
+
+        maxDiv.onclick = function (e) {
+
+            tcolpick.value = palette.colors[0][0]
+            tcolpick.style.display = "inline-block"
+            tcolpick.click()
+
+            tcolpick.onchange = function () {
+
+                palette.colors[1][1] = tcolpick.value
+
+                maxDiv.children[1].style.backgroundColor = `${palette.colors[1][1]}`
+
+                palette.colorScale = d3.interpolateLab(palette.colors[0][0], palette.colors[1][1])
+                ramp(tcan, palette.colorScale)
+
+                drawSvg()
+                tcolpick.remove()
+            }
+        }
+
+    }
+
+}
 
 function ramp(can, colorScale, n = 400) {
 
@@ -434,9 +560,7 @@ function ramp(can, colorScale, n = 400) {
     can.style.imageRendering = "pixelated";
     let w = can.width / n
     for (let i = 0; i < n; ++i) {
-        console.log(i * w, 0, w, can.height)
         context.fillStyle = colorScale(i / (n - 1));
-        // context.fillStyle = "red";
         context.fillRect(i * w, 0, w, can.height);
     }
 
@@ -516,7 +640,7 @@ function makeDataColumnMenu(columns, name, selected, mode = "palette") {
     let select = document.createElement("select");
     select.setAttribute("name", name);
     select.setAttribute("mode", mode);
-
+    let options = {}
 
     select.innerHTML += `<option value="none">none</option>`;
     for (const [key, value] of Object.entries(columns)) {
@@ -524,7 +648,6 @@ function makeDataColumnMenu(columns, name, selected, mode = "palette") {
     }
 
     if (mode === "palette") {
-
 
         select.onchange = function (e) {
             let tval = select.value
@@ -538,7 +661,6 @@ function makeDataColumnMenu(columns, name, selected, mode = "palette") {
                 }
             }
 
-
             if (tval === "none") {
                 delete dataBinding[palette]
             } else {
@@ -550,6 +672,18 @@ function makeDataColumnMenu(columns, name, selected, mode = "palette") {
         }
 
     } else {
+        if (mode === "color") {
+            if (megaGlyph[name][mode].dataColumn !== "none" && megaGlyph[name][mode].dataColumn !== "") {
+                if (megaGlyph[name][mode].isLinear) {
+                    let tcont = makeContColorRamp(megaGlyph[name].color)
+                    options["color"] = tcont
+                } else {
+
+                    let tcont = makeContColorDisplay(megaGlyph[name].color)
+                    options["color"] = tcont
+                }
+            }
+        }
 
         select.onchange = function (e) {
             let tval = select.value
@@ -561,10 +695,28 @@ function makeDataColumnMenu(columns, name, selected, mode = "palette") {
 
                 if (megaGlyph[palette][mode]) {
                     if (mode === "color") {
-
                         megaGlyph[palette][mode] = makeColorScale(palette, tval)
-                        select.parentElement.appendChild(makeContColorRamp(megaGlyph[palette].color))
 
+                        if (megaGlyph[palette].color.isLinear) {
+
+
+                            let t = d3.select(select.parentElement)
+                            t.selectAll(".colorRamp").remove()
+                            t.selectAll(".colorDisplay").remove()
+
+
+                            let tcont = makeContColorRamp(megaGlyph[palette].color)
+                            select.parentElement.appendChild(tcont)
+
+                            // setMinMaxPicker(palette, tcont)
+                        } else {
+                            let t = d3.select(select.parentElement)
+                            t.selectAll(".colorRamp").remove()
+                            t.selectAll(".colorDisplay").remove()
+                            // megaGlyph[palette][mode] = makeColorScale(palette, tval)
+                            let tcont = makeContColorDisplay(megaGlyph[palette].color)
+                            select.parentElement.appendChild(tcont)
+                        }
                     } else {
                         megaGlyph[palette][mode].dataColumn = tval
                     }
@@ -578,6 +730,7 @@ function makeDataColumnMenu(columns, name, selected, mode = "palette") {
 
                 }
             } else {
+                console.log("heresomehow");
                 megaGlyph[palette] = {
                     dataColumn: tval
                 }
@@ -590,9 +743,36 @@ function makeDataColumnMenu(columns, name, selected, mode = "palette") {
 
     }
 
-    return select;
+    return [select, options];
 }
 
+
+function makeContColorDisplay(palette) {
+    let cont = document.createElement('div')
+    cont.classList.add('colorDisplay')
+
+    for (const [key, value] of Object.entries(palette.colors)) {
+        let tdivCont = document.createElement('div')
+        let tdiv = document.createElement('div')
+        tdiv.classList.add('colorDisplayElem')
+        tdiv.style.backgroundColor = value
+
+        let p = document.createElement('p')
+        p.classList.add('colorDisplayLabel')
+
+        p.innerText = key
+
+        tdivCont.appendChild(p)
+        tdivCont.appendChild(tdiv)
+
+        cont.appendChild(tdivCont)
+
+        setOrdinalPicker(palette, tdivCont, key)
+    }
+
+    return cont
+
+}
 
 function makeColorScale(palette, tval) {
     // let colorScale =
@@ -627,11 +807,16 @@ function makeColorScale(palette, tval) {
             ]
         } else {
 
-
+            megaGlyph[palette].color.isLinear = false
             megaGlyph[palette].color.colorScale = d3.scaleOrdinal(d3.schemeAccent);
+            megaGlyph[palette].color.allVal = [...new Set(chartDataset.data.map(d => d[useDatCol]))]
+            megaGlyph[palette].color.colors = {default: "#555"}
+            for (let i = 0; i < megaGlyph[palette].color.allVal.length; i++) {
+                megaGlyph[palette].color.colors[megaGlyph[palette].color.allVal[i]] = d3.schemeAccent[i % d3.schemeAccent.length]
+
+            }
+
         }
-
-
     }
 
     return megaGlyph[palette].color;
@@ -648,7 +833,7 @@ function makeParamOption(name, columns, palette) {
             tselected = megaGlyph[palette][name].dataColumn
         }
     }
-    let select = makeDataColumnMenu(columns, palette, tselected, name)
+    let [select, options] = makeDataColumnMenu(columns, palette, tselected, name)
 
     let div = document.createElement("div");
     div.classList.add("fakeGrammarRow")
@@ -656,9 +841,17 @@ function makeParamOption(name, columns, palette) {
     let p = document.createElement("p");
     p.innerHTML = `${name}:`;
 
+    let tkeys = Object.keys(options)
 
     div.appendChild(p)
     div.appendChild(select)
+    console.log(options);
+    if (tkeys.length > 0) {
+        if (options[tkeys[0]] !== undefined) {
+            div.appendChild(options[tkeys[0]])
+        }
+    }
+    // div.appendChild(select)
     list.appendChild(div)
 
     return list
@@ -704,15 +897,16 @@ function makeMarkTree() {
 
         tdiv.appendChild(makePaletteMenu(palettes, key))
         tdiv.appendChild(p)
-        tdiv.appendChild(makeDataColumnMenu(columns, key, value.dataColumn))
+        let [tsel, opts] = makeDataColumnMenu(columns, key, value.dataColumn)
+
+
+        tdiv.appendChild(tsel)
 
         summary.appendChild(tdiv)
         details.appendChild(summary)
         container.appendChild(details)
 
         // ---------------------- Mark rendering Settings------------------
-
-
         let markParamContainer = document.createElement("ul");
 
 
@@ -735,21 +929,20 @@ function makeMarkTree() {
 
 function addAMark() {
 
-    megaGlyph["new"] = {
-        dataColumn: "",
-        color: {
+    if (megaGlyph["new"] === undefined)
+        megaGlyph["new"] = {
             dataColumn: "",
-            scale: "ordinal",
-        },
-        size: {
-            dataColumn: "",
-            scale: "",
-        },
-        intensity: {
-            dataColumn: "",
-            scale: "",
+            size: {
+                dataColumn: "",
+                scale: "",
+            },
+            intensity: {
+                dataColumn: "",
+                scale: "",
+            }
         }
-    }
+
+    megaGlyph["new"].color = makeColorScale("new", "")
 
     makeMarkTree()
 

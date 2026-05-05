@@ -222,7 +222,11 @@ function makeCollageFromData(palettes, order, marks, row, color = undefined, siz
                     let tcol = megaGlyph[order[j]].color.colorScale(megaGlyph[order[j]].color.linearScale(row[megaGlyph[order[j]].color.dataColumn])).replace("rgb(", "").replace(")", "").split(",")
                     can = toColor(can, +tcol[0] * cl, +tcol[1] * cl, +tcol[2] * cl, 210)
                 } else {
-                    let tcol = hexToRgb(megaGlyph[order[j]].color.colorScale(row[megaGlyph[order[j]].color.dataColumn]))
+                    let tcol = hexToRgb(megaGlyph[order[j]].color.colors["default"])
+                    if (megaGlyph[order[j]].color.colors[row[megaGlyph[order[j]].color.dataColumn]]) {
+                        tcol = hexToRgb(megaGlyph[order[j]].color.colors[row[megaGlyph[order[j]].color.dataColumn]])
+                    }
+
                     can = toColor(can, tcol.r * cl, tcol.g * cl, tcol.b * cl, 210)
                 }
                 removeColor(230, 230, 230, can, 25)

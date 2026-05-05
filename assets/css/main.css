@@ -713,7 +713,8 @@ li .fakeGrammarRow {
 
 .colorRamp p {
     display: flex;
-    margin-bottom: -11px ;
+    margin-bottom: -3px ;
+
 }
 .colorRamp span {
     width: 15px;
@@ -725,5 +726,30 @@ li .fakeGrammarRow {
 
 .rampLabel {
     position: absolute;
-    top: 27px;
+    top: 26px;
+}
+
+.colorDisplay div {
+    max-width: 25px;
+
+}
+.colorDisplay  {
+    display: flex;
+    margin-left: 45px;
+}
+
+.colorDisplayElem {
+    width: 15px;
+    height: 15px;
+}
+
+.colorDisplayLabel {
+    transform-origin: center;
+    transform: rotate(-45deg);
+    margin-bottom: 11px;
+    margin-left: -14px;
+    font-size: 14px;
+    text-overflow:ellipsis;
+    overflow:hidden;
+    width: 60px;
 }

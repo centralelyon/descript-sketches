@@ -21,6 +21,11 @@ let palIt = 0
 
 let megaPalettes = {}
 
+
+let nSelPaltette;
+let nSelMark;
+let nSelType;
+
 function addAPalette() {
 
     megaPalettes["temp" + palIt] = {
@@ -35,7 +40,7 @@ function addAPalette() {
 
     ++palIt
     fillPalette()
-
+    addAMark()
     drawSvg()
 }
 
@@ -419,6 +424,27 @@ function onClickPalette(e) {
         // document.getElementById("selectedButton2").removeAttribute("id")
         // doc
         // el.setAttribute("id", "selectedButton2")
+    } else if (mode === "eraseColor") {
+        let xy = getMousePos(e);
+        xy = toWorld(xy, paletteOrigin, paletteScale)
+        console.log(xy);
+
+        let tcan = megaPalettes[nSelPaltette].encodings.range.marks[nSelMark].source
+
+        let tw = 60
+        let th = 60
+
+        let tx = (xy.x - paletteTempCan.width / 2 + tw / 2)
+        let ty = (xy.y - paletteTempCan.height / 2 + th / 2)
+
+        let cont = tcan.getContext("2d")
+        const [r, g, b, a] = cont.getImageData(tx, ty, 1, 1).data;
+        console.log(r, g, b, a);
+
+        removeColor(r, g, b, paletteTempCan, 50)
+        removeColor(r, g, b, megaPalettes[nSelPaltette].encodings.range.marks[nSelMark].source, 50)
+        removeColor(r, g, b, megaPalettes[nSelPaltette].encodings.range.marks[nSelMark].proto.canvas, 50)
+
     }
 }
 
@@ -435,7 +461,7 @@ function updateAnchorCont(container) {
 
         let sel = ""
 
-        if (key == currAnchor) {
+        if (key === currAnchor) {
             sel = " selectedAnchor"
         }
 
@@ -1127,8 +1153,7 @@ function setAnchorOnProto(e, el) {
                 // tx = (xy.x *source.width) / tw
                 // ty = (xy.y *source.height) / th
 
-            }
-            else {
+            } else {
                 console.log("heheheh");
                 // tx = clampVal(xy.x - tw / 2 + source.width / 2, 0, source.width)
                 // ty = clampVal(xy.y - th / 2 + source.height / 2, 0, source.height)
@@ -1137,8 +1162,8 @@ function setAnchorOnProto(e, el) {
                 tx = clampVal(xy.x - tw / 2 + source.width / 2, 0, source.width)
                 ty = clampVal(xy.y - th / 2 + source.height / 2, 0, source.height)
             }
-            tw = source.width *scale
-            th = source.height *scale
+            tw = source.width * scale
+            th = source.height * scale
         }
 
 
@@ -1481,6 +1506,7 @@ function makeSingleMark(key, label, type, can = undefined) {
     tdiv_mark.setAttribute("type", type)
     tdiv_mark.setAttribute("number", "" + label)
 
+
     let mess = `<input type='text' value='${label}' class='paletteMarkName'>`
 
     if (type === "morph") {
@@ -1506,6 +1532,9 @@ function makeSingleMark(key, label, type, can = undefined) {
 
         if (mode !== "anchor") {
             if (e.target.matches("canvas")) {
+                nSelPaltette = key
+                nSelMark = label
+                nSelType = type
                 editPalette(this)
             }
         } else {
