@@ -101,7 +101,6 @@ async function drawSvg() {
 
     let encodings = Object.keys(dataBinding)
 
-    console.log(encodings);
     if (encodings.length === 0) {
 
         let useColor = false

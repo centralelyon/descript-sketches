@@ -498,6 +498,7 @@ table th {
     font-size: 20pt;
     margin-right: 10px;
     margin-top: 14px;
+    min-width: 90px;
 }
 
 #sampledMarks canvas {
@@ -505,6 +506,7 @@ table th {
     margin-right: 2px;
     border: 1px solid #777;
     border-radius: 4px;
+    cursor: grab;
 }
 
 #sampledMarks {
@@ -753,3 +755,58 @@ li .fakeGrammarRow {
     overflow:hidden;
     width: 60px;
 }
+
+.exportPaletteBtn {
+    cursor: pointer;
+    width: 50px;
+    padding: 0;
+    height: 29px;
+    margin-top: 35px;
+}
+
+.exportPaletteBtn img {
+    transform: scaleX(-1);
+    width: 21px;
+    height:21px;
+}
+
+.canPreview  {
+    position: relative;
+}
+
+.canPreview canvas {
+    position: absolute;
+}
+
+#AllPaletteCont .allPaletteRow {
+    /*display: flex;*/
+    margin: 2px;
+    border: solid 1px #555;
+    width: 95% ;
+    border-radius: 5px;
+    cursor: grab;
+
+}
+#AllPaletteCont p {
+    margin-bottom: 0px;
+    text-decoration: underline;
+    user-select: none;
+}
+
+.canPreview {
+    border-bottom: none !important;
+    margin-bottom: 5px;
+}
+
+#AllPaletteCont {
+    width: 180px;
+    height: 406px;
+    overflow-y: scroll;
+    border: 1px solid #555;
+    border-radius: 4px;
+}
+
+p, h3,h4,h5, img {
+    user-select: none;
+}
+

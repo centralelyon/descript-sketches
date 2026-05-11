@@ -21,7 +21,7 @@
     <script src="assets/js/imageHandler.js"></script>
     <script src="assets/js/canvasSampleHandler.js"></script>
     <script src="assets/js/computerVision.js"></script>
-    <script src="assets/js/modalHandler.js"></script>
+<!--    <script src="assets/js/modalHandler.js"></script>-->
     <script src="assets/js/svgHandler.js"></script>
     <script src="assets/js/paletteHandler.js"></script>
     <script src="assets/js/collageHandler.js"></script>
@@ -29,6 +29,7 @@
     <script src="assets/js/dragStuff.js"></script>
     <script src="assets/js/collageGrid.js"></script>
     <script src="assets/js/sandbox.js"></script>
+    <script src="assets/js/AllPalettes.js"></script>
     <script src="assets/js/main.js"></script>
 
 
@@ -141,6 +142,9 @@
 
     </div>
 
+
+
+
     <!--–––––––––––––––––––––– SVG Stuff –––––––––––––––––––––––––––– -->
 
     <div class="row" style="margin-top: 0;text-align: center;display:flex">
@@ -189,20 +193,29 @@
     </div>
 
 
+
     <!------------------------  Palette Stuff  ----------------------------------------------------------->
 
-    <div class="row" style="margin-top: 0;text-align: center;max-height: 450px;overflow-y: auto">
+    <div class="row" style="margin-top: 0;text-align: center;max-height: 450px;position: relative">
         <h3 style="width: 100%;text-align:center;display: inline-block">
             <input type="file" name="img" id="paletteLoader" style="display: none;"/>
-            <img src="assets/images/buttons/export.png" class="buttonImg" style="transform: scaleX(-1);cursor: pointer"
+            <img src="assets/images/buttons/export.png" class="buttonImg" style=";cursor: pointer"
                  onclick="fakeFile('paletteLoader')">
             Palettes <img src="assets/images/buttons/plus.png" class="buttonImg" style="margin-top: 41px;
   width: 25px;
   margin-left: 5px;cursor: pointer"
                           onclick="addAPalette(  )">
         </h3>
-        <div class="twelve columns " style="" id="paletteCont">
+        <p style="margin: 0; position: absolute;font-size:16pt;font-weight: 600;top: 64px "> Available Palettes</p>
+        <div style="display: flex">
+            <div id="AllPaletteCont">
+
+            </div>
+            <div style="margin-left:15px;width: 70vw;overflow-y: auto;max-height: 360px" id="paletteCont">
+            </div>
+
         </div>
+
     </div>
 
     <div class="" style="display: none" id="paletteContainer">

@@ -97,11 +97,18 @@ function fillPalette(reset = false) {
         "<option value ='morph'>morph</option>"
 
     for (const [key, value] of Object.entries(megaPalettes)) {
+        const expo = document.createElement("button")
+        expo.innerHTML = `<img class="buttonImg" src="/assets/images/buttons/export.png">`
+
+        expo.setAttribute("class", "exportPaletteBtn")
+        expo.setAttribute("id", "exportPaletteBtn_" + key)
+
+
         const tdiv = document.createElement("div")
         tdiv.id = "palette_" + key
         tdiv.className = "paletteMarks"
-        // tdiv.innerHTML = "<h4 onclick='exportPalette(\"" + key + "\",\"mark\")' class='paletteData'>" + key + ":</h4>"
-        tdiv.innerHTML = `<input type="text" onchange="renameRow(this,'${key}')" row="${tdiv.id}" value="${key}" class="waypointTitle" />`
+        tdiv.appendChild(expo)
+        tdiv.innerHTML += `<input type="text" onchange="renameRow(this,'${key}')" row="${tdiv.id}" value="${key}" class="waypointTitle" />`
 
         if (value.displayType !== undefined) {
             if (value.displayType === "repeat") {
@@ -240,10 +247,17 @@ function fillPalette(reset = false) {
 
         setMarkEvent(key, value.displayType)
 
+        document.getElementById("exportPaletteBtn_" + key).onclick = function (e) {
+            console.log("dsadas");
+            savePalette2(key)
+        }
+
         document.querySelectorAll("#" + key + "_displayTypes option").forEach(option => {
             if (option.value === value.displayType)
                 option.setAttribute("selected", "true")
         })
+
+
     }
 
     let trange = document.getElementById("strokewidth")
@@ -1270,23 +1284,23 @@ function importPalette(e) {
     reader.onload = async function (e) {
         let jsonObj = JSON.parse(e.target.result);
 
-        for (const [key, value] of Object.entries(jsonObj.data)) {
+        for (const [key, value] of Object.entries(jsonObj.encodings.range.marks)) {
             if (value.proto) {
                 value.proto.canvas = await convertToCanvas(value.proto.canvas)
             }
+
+            if (value.source) {
+                value.source = await convertToCanvas(value.source)
+            }
         }
 
-        if (jsonObj.type === "mark") {
-            marks[jsonObj.name] = jsonObj.data;
-        }
-        if (jsonObj.type === "primitive") {
-            primitive[jsonObj.name] = jsonObj.data;
-        }
-        if (jsonObj.type === "category") {
-            palette_cat[jsonObj.name] = jsonObj.data;
-        }
 
-        fillPalette([0, 10], false)
+        let n = Object.keys(megaPalettes).length
+
+        megaPalettes[`temp${n}`] = jsonObj
+
+
+        fillPalette(false)
     }
     reader.readAsText(e.target.files[0]);
 }
@@ -1555,4 +1569,29 @@ function renameRow(elem, key,) {
     delete megaPalettes[key]
 
     fillPalette()
+}
+
+function savePalette2(key) {
+
+    console.log("dadasdsadas");
+    console.log(key);
+    let res = megaPalettes[key]
+
+
+    for (const [key, value] of Object.entries(res)) {
+        if (typeof value === "object") {
+            const tval = {...value}
+            res[key] = tval
+        }
+    }
+
+    for (const [key, value] of Object.entries(res.encodings.range.marks)) {
+        res.encodings.range.marks[key].proto.canvas = res.encodings.range.marks[key].proto.canvas.toDataURL("image/png")
+        if (res.encodings.range.marks[key].source) {
+            res.encodings.range.marks[key].source = res.encodings.range.marks[key].source.toDataURL("image/png")
+        }
+    }
+
+
+    download(JSON.stringify(res), "palette_" + key + ".json", "text/json");
 }

@@ -161,8 +161,10 @@ async function init() {
 */
     loadImg("assets/images/hand/notice.png")
     switchMode("rect")
+    initAllPalette()
 
-    await loadDataset("assets/tempData/penguins.csv")
+    // await loadDataset("assets/tempData/datasets/penguins.csv")
+    await loadDataset("assets/tempData/datasets/week26.csv")
     drawSvg()
     document.getElementById("jsonLoader").addEventListener("change", importFromJson);
     document.getElementById("imgLoader").addEventListener("change", importImg);
