@@ -354,6 +354,8 @@ canvas {
     width: 100%;
     cursor: crosshair;
     touch-action: none;
+    min-width: 80%;
+    min-height: 400px;
 }
 
 #markInfos {
@@ -715,9 +717,10 @@ li .fakeGrammarRow {
 
 .colorRamp p {
     display: flex;
-    margin-bottom: -3px ;
+    margin-bottom: -3px;
 
 }
+
 .colorRamp span {
     width: 15px;
     height: 15px;
@@ -735,7 +738,8 @@ li .fakeGrammarRow {
     max-width: 25px;
 
 }
-.colorDisplay  {
+
+.colorDisplay {
     display: flex;
     margin-left: 45px;
 }
@@ -751,8 +755,8 @@ li .fakeGrammarRow {
     margin-bottom: 11px;
     margin-left: -14px;
     font-size: 14px;
-    text-overflow:ellipsis;
-    overflow:hidden;
+    text-overflow: ellipsis;
+    overflow: hidden;
     width: 60px;
 }
 
@@ -767,10 +771,10 @@ li .fakeGrammarRow {
 .exportPaletteBtn img {
     transform: scaleX(-1);
     width: 21px;
-    height:21px;
+    height: 21px;
 }
 
-.canPreview  {
+.canPreview {
     position: relative;
 }
 
@@ -782,11 +786,12 @@ li .fakeGrammarRow {
     /*display: flex;*/
     margin: 2px;
     border: solid 1px #555;
-    width: 95% ;
+    width: 95%;
     border-radius: 5px;
     cursor: grab;
 
 }
+
 #AllPaletteCont p {
     margin-bottom: 0px;
     text-decoration: underline;
@@ -799,14 +804,86 @@ li .fakeGrammarRow {
 }
 
 #AllPaletteCont {
-    width: 180px;
-    height: 406px;
+    /*width: 180px;*/
+    /*height: 406px;*/
     overflow-y: scroll;
-    border: 1px solid #555;
+    /*border: 1px solid #555;*/
     border-radius: 4px;
 }
 
-p, h3,h4,h5, img {
+p, h3, h4, h5, img {
     user-select: none;
 }
 
+
+#sidebar {
+    transition: 0.5s;
+    position: absolute;
+    width: 15px;
+    background-color: #fff;
+    left: -2.7vw;
+    /*height: 99.5vh;*/
+    /*top: 0;*/
+    height: 34vh;
+    top: 30%;
+    z-index: 99;
+    text-align: center;
+    padding: 3px;
+    border-top-right-radius: 25px 25px;
+    border-bottom-right-radius: 25px 25px;;
+    border-right: solid 1px #717171;
+}
+
+
+#sideArrow img {
+    width: 20px;
+    cursor: pointer;
+    height: 20px;
+    margin-top: 7.5px;
+    margin-left: -10px;
+    transition: 1.15s;
+
+}
+
+#sideArrow {
+    position: absolute;
+    top: 50%;
+    width: 32px;
+    height: 35px;
+    background-color: inherit;
+    right: -22px;
+    border-radius: 5px;
+    transition: .5s;
+
+}
+
+
+.sideContent {
+    display: none;
+}
+
+#AllPaletteCont {
+    overflow-y: auto;
+    height: 74vh;
+    width: 240px;
+    -ms-overflow-style: none; /* Internet Explorer 10+ */
+    scrollbar-width: none; /* Firefox, Safari 18.2+, Chromium 121+ */
+    /*border: 1px solid #555;*/
+}
+
+.draggedover {
+    border: 3px dashed red !important;
+    transition: 0s !important;
+    background-color: rgba(50, 50, 50, 0.1);
+    padding: 0 !important;
+}
+
+#navButtonList button {
+    color: #eee;
+}
+
+.collageElement {
+    outline: solid 1px #333;
+    border-radius: 4px;
+    cursor: crosshair;
+}

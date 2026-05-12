@@ -9,7 +9,7 @@ let palSources = [
 
 ]
 
-const prevW = 80
+const prevW = 160
 const prevH = 60
 
 const subW = 30
@@ -47,8 +47,8 @@ async function initAllPalette() {
 
         let MarkNames = Object.keys(allMarks)
         let n = MarkNames.length;
-        let offx = 4
-        let offy = 6
+        let offx = 14
+        let offy = 3
 
         if (offx * n + subW > prevW || offy * n + subH > prevH) {
             offx = (prevW - subW) / n
@@ -72,6 +72,24 @@ async function initAllPalette() {
 
 
     }
+
+    let tPalCont = document.getElementById("paletteCont")
+
+
+    tPalCont.onmouseover= function (e) {
+        if (dragging) {
+
+        this.classList.add("draggedover");
+        }
+    }
+
+    tPalCont.onmouseleave= function (e) {
+        if (dragging) {
+            this.classList.remove("draggedover");
+        }
+    }
+
+
 
 }
 
@@ -99,6 +117,53 @@ async function loadSavedPalette(url) {
     allPalettes.push(palette)
 
     // megaPalettes[`temp${n}`] = jsonObj
+
+
+}
+
+
+let flipSide = false
+let containerWidth = 250
+let offsetWidth = 15
+
+let sideOffset = containerWidth - offsetWidth / 2
+let placeHolderBool = true
+
+
+function openNav() {
+    let container = document.getElementById("sidebar")
+    let containerImg = document.getElementById("sideArrow")
+
+
+    flipSide = !flipSide
+
+    let img = document.getElementById("sideImg");
+
+    if (flipSide) {
+        img.style.transform = "";
+        container.style.width = `${containerWidth}px`
+
+        // containerImg.style.right = `${sideOffset}px`
+
+        container.style.border = "solid 1px #333"
+        container.style.height = `${80.5}vh`
+        container.style.top = `${6}%`
+
+        document.querySelectorAll(".sideContent").forEach(el => {
+            el.style.display = "inline-block";
+        })
+    } else {
+        img.style.transform = "scaleX(-1)";
+        container.style.width = `${offsetWidth}px`
+        containerImg.style.right = "-22px";
+
+        container.style.height = `${35}vh`
+        container.style.top = `${30}%`
+
+        document.querySelectorAll(".sideContent").forEach(el => {
+            el.style.display = "none";
+        })
+    }
 
 
 }

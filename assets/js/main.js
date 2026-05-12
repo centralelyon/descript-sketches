@@ -41,8 +41,7 @@ let globalPalettes = {}
 const fakePalettesBase = "assets/tempData/"
 // const fakePalettes = ["palette_anxiety.json", "palette_stem.json", "palette_you.json", "palette_wrong.json"]
 const fakePalettes = []
-
-
+let palSwitch = false
 docReady(init)
 
 
@@ -147,18 +146,18 @@ async function init() {
     let authorRef = author === "giorgia" ? 0 : 1;
     // loadExamples(week);
 
-/*
-    if (dataRef[author + "_" + week]) {
-        let json = await getData(dataRef[author + "_" + week])
-        importData(json);
-    } else {
-        let url = ""
-        if (type === "deardata") {
-            url = url_templates[authorRef][0] + week + url_templates[authorRef][1]
+    /*
+        if (dataRef[author + "_" + week]) {
+            let json = await getData(dataRef[author + "_" + week])
+            importData(json);
+        } else {
+            let url = ""
+            if (type === "deardata") {
+                url = url_templates[authorRef][0] + week + url_templates[authorRef][1]
+            }
+            loadImg(url)
         }
-        loadImg(url)
-    }
-*/
+    */
     loadImg("assets/images/hand/notice.png")
     switchMode("rect")
     initAllPalette()
@@ -166,17 +165,14 @@ async function init() {
     // await loadDataset("assets/tempData/datasets/penguins.csv")
     await loadDataset("assets/tempData/datasets/week26.csv")
     drawSvg()
-    document.getElementById("jsonLoader").addEventListener("change", importFromJson);
+    // document.getElementById("jsonLoader").addEventListener("change", importFromJson);
     document.getElementById("imgLoader").addEventListener("change", importImg);
     document.getElementById("paletteLoader").addEventListener("change", importPalette);
 
 
-
-    document.getElementById("glyphTree").addEventListener("click",cancelCollapse)
+    document.getElementById("glyphTree").addEventListener("click", cancelCollapse)
 
 }
-
-
 
 
 async function getData(url) {
@@ -274,9 +270,9 @@ function fillCatMod(category) {
 docReady(function () {
 
 
-    document.getElementById("marks").addEventListener('mouseout', (e) => {
-        resetImg()
-    });
+    // document.getElementById("marks").addEventListener('mouseout', (e) => {
+    //     resetImg()
+    // });
 
     // document.getElementById("svgControl").addEventListener('click', (e) => {
 
@@ -422,37 +418,19 @@ onkeydown = function (e) {
 }
 
 
-function sortMarks(marks, type) {
 
-    if (type === "category") {
 
-        let t = Object.groupBy(marks, ({category}) => category.name)
-        let temp = []
-
-        for (const [key, value] of Object.entries(t)) {
-            temp = temp.concat(value)
-        }
-
-        return temp
-
-    } else if (type === "size") {
-
-        return marks.sort((a, b) => (a.width * a.height) - (b.width * b.height));
-    }
-
-}
-
-function updateMarks(type) {
-
-    let container = document.getElementById("marks");
-    let marks = sortMarks([...sampleData], type)
-
-    container.innerHTML = "";
-    for (let i = 0; i < marks.length; i++) {
-        // marks[i].canvas.style.border = "solid " + marks[i].categories.color + " 2px"
-        container.appendChild(marks[i].canvas);
-    }
-}
+// function updateMarks(type) {
+//
+//     let container = document.getElementById("marks");
+//     let marks = sortMarks([...sampleData], type)
+//
+//     container.innerHTML = "";
+//     for (let i = 0; i < marks.length; i++) {
+//         // marks[i].canvas.style.border = "solid " + marks[i].categories.color + " 2px"
+//         container.appendChild(marks[i].canvas);
+//     }
+// }
 
 
 function updateCategories() {
@@ -784,17 +762,11 @@ function purge() {
     stroke = [];
 
     selectedMark = null
-    updateMarks("size")
-    document.querySelectorAll(".category").forEach((item) => {
-        // if (item.getAttribute("value") !== "default") {
-        item.remove()
-        // }
-    })
-    updateCategories()
 
-    const svg = d3.select('#svgDisplay');
-    svg.selectAll("image").remove();
-    document.getElementById("paletteCont").innerHTML = "";
+
+
+
+    // document.getElementById("paletteCont").innerHTML = "";
     // populateSelect()
     // fillTable()
 }
@@ -863,6 +835,19 @@ async function fillAllPalette() {
         tcan.height = 78
 
 
+    }
+
+}
+
+function switchPalette() {
+
+    palSwitch = !palSwitch
+    let container = document.getElementById("paletteCollector")
+
+    if (palSwitch) {
+        container.style.display = "block"
+    } else {
+        container.style.display = "none"
     }
 
 }

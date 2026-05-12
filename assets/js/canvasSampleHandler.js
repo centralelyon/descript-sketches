@@ -157,10 +157,10 @@ async function addRectSample(x, y, width, height) {
 
 
     sampleData.push(tres)
-
+/*
     let marks = document.getElementById("marks")
 
-    marks.append(tcan)
+    marks.append(tcan)*/
 
     tcont.drawImage(currImg,
         Math.round(dp.rx * currImg.width),
@@ -403,9 +403,9 @@ async function addFreeSample(points) {
     )
 
 
-    let marks = document.getElementById("marks")
+/*    let marks = document.getElementById("marks")
 
-    marks.append(tcan)
+    marks.append(tcan)*/
     sampleData.push(tres)
     fillSvg(sampleData)
 }

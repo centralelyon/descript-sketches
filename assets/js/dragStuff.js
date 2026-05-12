@@ -1,87 +1,63 @@
 let dragMode = "canvas"
 
+let dragging = false;
+
+let offsetX = 0;
+let offsetY = 0;
+
+
 function dragElement(elmnt) {
     var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-    if (document.getElementById(elmnt.id + "header")) {
 
-        document.getElementById(elmnt.id + "header").onmousedown = dragMouseDown;
-    } else {
-
-        elmnt.onmousedown = dragMouseDown;
-    }
-
-    // let bbox= elmnt.getBoundingClientRect()
-
-    // elmnt.width = bbox.width;
-    // elmnt.style.width = bbox.width+"px";
+    elmnt.onmousedown = dragMouseDown;
 
 
     function dragMouseDown(e) {
         e = e || window.event;
         e.preventDefault();
         dragging = true
-        let bbox = elmnt.getBoundingClientRect()
         if (elmnt.className === "allPaletteRow") {
             dragMode = "palette"
-            console.log(e);
-            pos1 = e.pageX - e.layerX + 10;
-            pos2 = e.pageY - -e.layerY + 10;
-            elmnt.style.width = bbox.width + "px";
         } else {
-            dragMode = "canvas"
-            pos1 = e.pageX - bbox.left + 10;
-            pos2 = e.pageY - bbox.top + 10;
+            dragMode = "canvas";
         }
 
-        console.log(bbox);
 
-        // pos3 = e.offsetX
-        // pos4 = e.offsetY
+        const rect = elmnt.getBoundingClientRect();
 
-        elmnt.style.position = "absolute";
+        offsetX = e.clientX - rect.left;
+        offsetY = e.clientY - rect.top;
 
-        // elmnt.style.top = pos4 + "px";
-        // elmnt.style.left = pos3 + "px";
-
-        console.log(e)
-        // if (dragMode === "palette") {
-
-        /*        if (dragMode === "palette") {
-                    pos4 = e.layerY;
-                    pos3 = e.layerX
-                } else {
-                    pos3 = e.clientX - e.layerX
-                    pos4 = e.pageY;
-                }*/
-
+        // get the mouse cursor position at startup:
+        pos3 = e.clientX;
+        pos4 = e.clientY;
         document.onmouseup = closeDragElement;
-
+        // call a function whenever the cursor moves:
         document.onmousemove = elementDrag;
     }
 
     function elementDrag(e) {
         e = e || window.event;
         e.preventDefault();
+        // calculate the new cursor position:
+        pos1 = pos3 - e.clientX;
+        pos2 = pos4 - e.clientY;
+        pos3 = e.clientX;
+        pos4 = e.clientY;
 
-        // pos1 = pos3 - e.clientX;
-        // pos2 = pos4 - e.clientY;
-
-        pos3 = e.pageX - pos1;
-        pos4 = e.pageY - pos2;
-
-
-        // console.log(pos4);
         // set the element's new position:
         elmnt.style.position = "absolute";
+
+
+        elmnt.style.left =
+            (e.pageX - offsetX) + "px";
+
+        elmnt.style.top =
+            (e.pageY - offsetY) + "px";
+
         // elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
-        elmnt.style.top = pos4 + "px";
-        elmnt.style.left = pos3 + "px";
         // elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
 
-        // let bbox= elmnt.getBoundingClientRect()
-
-        // elmnt.width = bbox.width;
-        // elmnt.style.width = bbox.width+"px";
     }
 
     function closeDragElement(e) {
@@ -91,7 +67,9 @@ function dragElement(elmnt) {
         elmnt.style.left = ""
         document.onmouseup = null;
         document.onmousemove = null;
+        dragging = false
 
+        console.log(e.target);
         if (dragMode === "canvas") {
             dropCanvas(e, elmnt)
         } else {
@@ -105,7 +83,7 @@ function dragElement(elmnt) {
 
 function dropPalette(e, elmnt) {
 
-    if (e.target.matches("#paletteCont")) {
+    if (e.target.matches("#paletteCont") || e.target.matches(".paletteMark") || e.target.matches(".paletteMarks")) {
 
         let num = +elmnt.getAttribute("number")
         let name = elmnt.getAttribute("name")
@@ -116,14 +94,20 @@ function dropPalette(e, elmnt) {
 
         fillPalette()
 
+        let tPalCont = document.getElementById("paletteCont")
+        tPalCont.classList.remove("draggedover")
+    } else if (e.target.matches("#composition")) {
 
+
+        let num = +elmnt.getAttribute("number")
+        let name = elmnt.getAttribute("name")
+        addPaletteInfoToCollage(allPalettes[num],name)
     }
 }
 
 function dropCanvas(e, elmnt) {
     if (e.target.matches(".paletteMark")) {
 
-        console.log(e.target.getAttribute("number"));
 
     } else if (e.target.parentElement.matches(".paletteMark")) {
 
