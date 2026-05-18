@@ -1168,7 +1168,7 @@ function setAnchorOnProto(e, el) {
                 // ty = (xy.y *source.height) / th
 
             } else {
-                console.log("heheheh");
+
                 // tx = clampVal(xy.x - tw / 2 + source.width / 2, 0, source.width)
                 // ty = clampVal(xy.y - th / 2 + source.height / 2, 0, source.height)
 
@@ -1222,7 +1222,6 @@ function setAnchorOnProto(e, el) {
             key: key,
             number: num,
             data: selProto.anchors[currAnchor]
-
         }
 
         // }

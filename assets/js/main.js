@@ -163,7 +163,9 @@ async function init() {
     initAllPalette()
 
     // await loadDataset("assets/tempData/datasets/penguins.csv")
-    await loadDataset("assets/tempData/datasets/week26.csv")
+    // await loadDataset("assets/tempData/datasets/week26.csv")
+    
+    chartDataset.data = fakeWeek26()
     drawSvg()
     // document.getElementById("jsonLoader").addEventListener("change", importFromJson);
     document.getElementById("imgLoader").addEventListener("change", importImg);
@@ -416,8 +418,6 @@ onkeydown = function (e) {
             switchMark("next")
     }
 }
-
-
 
 
 // function updateMarks(type) {
@@ -764,8 +764,6 @@ function purge() {
     selectedMark = null
 
 
-
-
     // document.getElementById("paletteCont").innerHTML = "";
     // populateSelect()
     // fillTable()
@@ -849,5 +847,29 @@ function switchPalette() {
     } else {
         container.style.display = "none"
     }
+
+}
+
+
+function fakeWeek26() {
+    let tdat = [53, 44, 27, 22, 23, 15, 14, 12, 12, 11, 8]
+
+    let res = []
+
+    let id = 0
+    for (let i = 0; i < tdat.length; i++) {
+        for (let j = 0; j < tdat[i]; j++) {
+
+            res.push({
+                id: id,
+                category: i,
+            })
+            ++id
+        }
+
+    }
+
+    return res
+
 
 }

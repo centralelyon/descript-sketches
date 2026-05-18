@@ -546,10 +546,9 @@ table th {
 }
 
 #AllPaletteCont canvas {
-
     border: 1px solid #555;
-
     border-radius: 4px;
+    background: #F1F1F1;
 }
 
 /*#chartSettings*/
@@ -573,7 +572,6 @@ table th {
     display: flex;
     width: 100%;
     flex-wrap: wrap;
-
 }
 
 

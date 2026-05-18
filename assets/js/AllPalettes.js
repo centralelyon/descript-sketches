@@ -103,10 +103,12 @@ async function loadSavedPalette(url) {
     for (const [key, value] of Object.entries(palette.encodings.range.marks)) {
         if (value.proto) {
             value.proto.canvas = await convertToCanvas(value.proto.canvas)
+            // removeColor(241, 241, 241,   value.proto.canvas, 15)
         }
 
         if (value.source) {
             value.source = await convertToCanvas(value.source)
+            // removeColor(241, 241, 241, value.source, 15)
         }
     }
 

@@ -244,21 +244,19 @@ function makeCollageFromData(palettes, order, marks, row, color = undefined, siz
 
             let offX = base[0]
             let offY = base[0]
+            console.log(ref.apply);
 
-
+            let toOffX = 0
+            let toOffY = 0
             if (ref.apply) {
                 let anchorId = ref.linkTo
 
                 let to = megaPalettes[ref.apply]
 
                 //WHERE PREVIOUS WAS DRAWN
-                offX = drawnMarks[ref.apply].x
-                offY = drawnMarks[ref.apply].y
-
-                let selfAnchor = mark.proto.anchors[anchorId]
-
-                offX += selfAnchor.rx * sourceW
-                offY += selfAnchor.ry * sourceH
+                offX = drawnMarks[ref.apply].x - (drawnMarks[ref.apply].w / 2)
+                offY = drawnMarks[ref.apply].y - (drawnMarks[ref.apply].h / 2)
+                // tcon.fillRect(offX, offY, 5, 5)
 
                 if (to.displayType === "range") {
                     let instancedMark = marks[ref.apply][row[dataBinding[ref.apply]]]
@@ -267,21 +265,45 @@ function makeCollageFromData(palettes, order, marks, row, color = undefined, siz
                     if (instancedMark.scale) {
                         tsc = instancedMark.scale
                     }
-                    offX -= ToAnchor.rx * (instancedMark.source.width * tsc)
-                    offY -= ToAnchor.ry * (instancedMark.source.height * tsc)
+
+
+                    offX += ToAnchor.rx * (instancedMark.source.width * tsc)
+                    offY += ToAnchor.ry * (instancedMark.source.height * tsc)
 
                 }
+                // tcon.fillStyle = "red"
+                // tcon.fillRect(offX, offY, 5, 5)
+
+                let selfAnchor = mark.proto.anchors[anchorId]
+
+                // offX += selfAnchor.rx * sourceW
+                // offY += selfAnchor.ry * sourceH
+
+                toOffX = selfAnchor.rx * sourceW
+                toOffY = selfAnchor.ry * sourceH
+
+                console.log(toOffX * sourceW,toOffY)
+
+                tcon.drawImage(can,
+                    offX - toOffX,
+                    offY - toOffY,
+                    sourceW,
+                    sourceH)
+
+            } else {
+                tcon.drawImage(can,
+                    offX - (sourceW / 2 + toOffX),
+                    offY - (sourceH / 2 + toOffY),
+                    sourceW,
+                    sourceH)
             }
 
+            //TODO: bug inducing with chained anchors
             drawnMarks[order[j]] = {x: offX, y: offY, w: sourceW, h: sourceH}
 
 
-            // tcon.drawImage(mark.source, offX - sourceW / 2, offY - sourceH / 2, sourceW, sourceH)
-            tcon.drawImage(can, offX - sourceW / 2, offY - sourceH / 2, sourceW, sourceH)
 
         }
-        // console.log(drawnMarks);
-
 
     }
 

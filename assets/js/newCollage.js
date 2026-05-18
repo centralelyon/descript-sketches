@@ -12,6 +12,7 @@ let anchoring = false
 let newAnchors = []
 
 let anchoringRef = ""
+let nAnchor = 0
 
 function placeMark() {
 
@@ -33,7 +34,7 @@ function addPaletteInfoToCollage(palette, name) {
     let show = palette.encodings.range.marks["mark0"].proto.canvas
 
     drawnMarks[name] = placeMark()
-    console.log(drawnMarks[name]);
+
     svg.append("image")
         .attr("class", "collageElement")
         .attr("xlink:href", show.toDataURL("image/png"))
@@ -44,7 +45,7 @@ function addPaletteInfoToCollage(palette, name) {
         .attr("height", drawnMarks[name].h)
         .on("click", function (e) {
             let elem = e.target
-            console.log(e)
+
             if (!anchoring) {
                 anchoring = true
                 anchoringRef = name
@@ -62,7 +63,8 @@ function addPaletteInfoToCollage(palette, name) {
                     .attr("fill", drawnMarks[name].x)
 
                 tFrom = {x: drawnMarks[name].x + offx, y: drawnMarks[name].y + offy, rx: offx, ry: offy, name: name}
-
+                megaPalettes[name].linkto = name
+                setAnchorOnAllMarks(name, offx, offy, nAnchor)
             } else {
                 if (anchoringRef !== name) {
 
@@ -94,6 +96,13 @@ function addPaletteInfoToCollage(palette, name) {
                         .attr("fill", "none")
                     // .attr("stroke", drawnMarks[name].x)
 
+                    megaPalettes[name].apply = tFrom.name
+                    megaPalettes[name].linkTo = nAnchor
+                    setAnchorOnAllMarks(name, offx, offy, nAnchor)
+                    // setAnchorOnAllMarks(tFrom.name, offx, offy, name)
+                    nAnchor++
+                    anchoring = false
+                    anchoringRef = ""
 
                 } else {
                     let imCord = {x: +elem.getAttribute("x"), y: +elem.getAttribute("y")}
@@ -110,9 +119,26 @@ function addPaletteInfoToCollage(palette, name) {
                 }
             }
         })
-
-
 }
+
+
+function setAnchorOnAllMarks(name, x, y, from) {
+
+
+    for (const [id, value] of Object.entries(megaPalettes[name].encodings.range.marks)) {
+        if (!value.proto.anchors) {
+            value.proto.anchors = {}
+        }
+
+        value.proto.anchors[from] = {
+            x: x,
+            y: y,
+            rx: x / 60,
+            ry: y / 60,
+        }
+    }
+}
+
 
 function rand(n) {
     return (Math.random() - 0.5) * n;

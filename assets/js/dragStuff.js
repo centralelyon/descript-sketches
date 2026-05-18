@@ -102,6 +102,21 @@ function dropPalette(e, elmnt) {
         let num = +elmnt.getAttribute("number")
         let name = elmnt.getAttribute("name")
         addPaletteInfoToCollage(allPalettes[num],name)
+        megaPalettes[name] = allPalettes[num]
+
+        megaGlyph[name] = {
+            dataColumn: "",
+            size: {
+                dataColumn: "",
+                scale: "",
+            },
+            intensity: {
+                dataColumn: "",
+                scale: "",
+            }
+        }
+        megaGlyph[name].color = makeColorScale(name, "")
+        makeMarkTree()
     }
 }
 

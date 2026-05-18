@@ -9,7 +9,7 @@ let chartAxis = {
 const defaultMinColor = "#a50026"
 const defaultMaxColor = "#313695"
 
-
+let useForce = false
 let gridMod = false
 
 const datasetList = ["pinguin"]
@@ -65,7 +65,7 @@ defaultCont.fillRect(0, 0, 30, 30)
 async function loadDataset(url) {
     let data = await loadCsv(url).then(r => r)
     console.log(data);
-    if (url.includes("pinguin")) { //TODO: to unfazed to bother with NONE stuff
+    if (url.includes("pinguin")) { //TODO: too unfazed to bother with NONE stuff
         data.splice(3, 1)
         data.splice(338, 1)
     }
@@ -92,6 +92,7 @@ async function drawSvg() {
 
     svg.selectAll("*").remove();
 
+    let timages
     let size = svg.node().getBoundingClientRect()
 
     let margin = 20
@@ -99,6 +100,14 @@ async function drawSvg() {
     let xScale = d3.scaleLinear(d3.extent(data.map(d => d[chartAxis.x])), [margin, size.width - margin])
     let yScale = d3.scaleLinear(d3.extent(data.map(d => d[chartAxis.y])), [size.height - margin, margin])
 
+
+    for (let i = 0; i < data.length; i++) {
+        data[i].x = size.width / 2
+        // data[i].x =size.width /2+ xScale(data[i][chartAxis.x])
+        // data[i].y = size.height/2 +yScale(data[i][chartAxis.y])
+        data[i].y = size.height / 2
+
+    }
     let encodings = Object.keys(dataBinding)
 
     if (encodings.length === 0) {
@@ -275,7 +284,7 @@ async function drawSvg() {
                         }
 
 
-                        svg.append("image")
+                        timages = svg.append("image")
                             .attr("xlink:href", can.toDataURL("image/png"))
                             .attr("x", xCumul)
                             .attr("y", yCumul)
@@ -294,7 +303,7 @@ async function drawSvg() {
                 } else {
 
 
-                    svg.selectAll("dots")
+                    timages = svg.selectAll("dots")
                         .data(data)
                         .enter()
                         .append("image")
@@ -316,16 +325,16 @@ async function drawSvg() {
 
                                 removeColor(230, 230, 230, can, 25)
                             }
+                            removeColor(240, 240, 240, can, 15)
                             return can.toDataURL("image/png")
 
                         })
-                        .attr("x", (d, i) => {
+                        .attr("x", d => {
                             return xScale(d[chartAxis.x])
                         })
-                        .attr("y", (d, i) => {
-                                return yScale(d[chartAxis.y])
-                            }
-                        )
+                        .attr("y", d => {
+                            return yScale(d[chartAxis.y]);
+                        })
                         .attr("width", d => {
                             if (useMorph) {
                                 return marks[d[dataBinding[encodings[0]]]].source.width * morphScale(d[useDatMorph])
@@ -356,8 +365,13 @@ async function drawSvg() {
                     .enter()
                     .append("image")
                     .attr("xlink:href", pal.encodings.morph.max.proto.canvas.toDataURL("image/png"))
-                    .attr("x", d => xScale(d[chartAxis.x]))
-                    .attr("y", d => yScale(d[chartAxis.y]))
+                    .attr("x", d => {
+                        return xScale(d[chartAxis.x]);
+                    })
+                    .attr("y", d => {
+                        return yScale(d[chartAxis.y])
+                    })
+
                     .attr("width", d => {
                         return sizeScale(d[dataBinding[encodings[0]]])
                     })
@@ -391,7 +405,7 @@ async function drawSvg() {
                 let tw = can.width
                 let th = can.height
 
-                svg.append("image")
+                timages = svg.append("image")
                     .attr("xlink:href", can.toDataURL("image/png"))
                     .attr("x", xCumul)
                     .attr("y", yCumul)
@@ -412,19 +426,49 @@ async function drawSvg() {
                 allColScales[encodings[i]] = {}
             }
             //TODO: here use makeColorScale(data, palette) and make dicts for each palette
-            svg.selectAll("dots")
+            timages = svg.selectAll("dots")
                 .data(data)
                 .enter()
                 .append("image")
                 .attr("xlink:href", d =>
                     makeCollageFromData(encodings, order, tmarks, d).toDataURL("image/png"))
-                .attr("x", d => xScale(d[chartAxis.x]))
-                .attr("y", d => yScale(d[chartAxis.y]))
+                .attr("x", d => {
+                    d.x = xScale(d[chartAxis.x]);
+                    return d.x
+                })
+                .attr("y", d => {
+                    d.y = yScale(d[chartAxis.y]);
+                    return d.y
+                })
 
 
         }
     }
 
+    if (timages && !gridMod && useForce) {
+
+        const simulation = d3.forceSimulation(data)
+            .force("collide", d3.forceCollide().radius(d => 18).strength(0.01))
+            .force("x", d3.forceX().strength(0.00025))
+            .force("y", d3.forceY().strength(0.00032))
+            .on("tick", ticked)
+
+        let duration = 2000
+
+        let t = d3.timer(elapsed => {
+            let dt = elapsed / duration
+            simulation.force("collide").strength(dt)
+            if (dt >= 1.0) t.stop()
+        })//timer
+
+
+        function ticked() {
+
+            timages
+                .attr("x", d => clampVal(d.x, 0, 800))
+                .attr("y", d => clampVal(d.y, 0, 460))
+        }//function ticked
+    }
     populateSandboxMenu(data)
 }
 
@@ -1059,5 +1103,11 @@ function getKeyByValue(object, value) {
 function switchGrid() {
 
     gridMod = !gridMod;
+    drawSvg()
+}
+
+function switchForce() {
+
+    useForce = !useForce;
     drawSvg()
 }
