@@ -4,6 +4,7 @@ let username = ""
 let password = ""
 let credentials = ""
 let useServer = true
+let imgList
 
 async function getPaletteList() {
 
@@ -35,7 +36,18 @@ function login() {
 }
 
 
-function uploadPalette(palette, name) {
+function switchUseServer(val) {
+
+    useServer = val;
+}
+
+async function uploadPalette(palette, name) {
+
+    if (imgList === undefined) {
+        imgList = await d3.json(serverBaseUrl + "images")
+        console.log(imgList);
+    }
+
 
     if (credentials === "") {
         login()
@@ -46,7 +58,12 @@ function uploadPalette(palette, name) {
     if (tt.preloadName) {
         tt.originImg = ""
     } else {
-        tt.originImg = tsrc
+
+        if (tsrc.includes("data:image")) {
+            pushImage(palette.originImg, name)
+        }
+
+        tt.originImg = serverBaseUrl + "images/" + name + ".png"
     }
 
 
@@ -61,6 +78,32 @@ function uploadPalette(palette, name) {
 
 
     fetch(serverBaseUrl + "palettes", {
+        method: 'POST',
+        headers: {
+            "Authorization": `Basic ${credentials}`,
+        },
+        body: data
+    })
+}
+
+
+function pushImage(img, name) {
+
+    if (credentials === "") {
+        login()
+    }
+
+    const data = new FormData();
+
+
+    data.append('file', {
+        uri: img.src,
+        name: name,
+        type: 'image/png',
+    })
+
+
+    fetch(serverBaseUrl + "images", {
         method: 'POST',
         headers: {
             "Authorization": `Basic ${credentials}`,

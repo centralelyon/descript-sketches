@@ -1348,13 +1348,8 @@ function changeScale(palette, type) {
 }
 
 
-function appendEncoding(palette) {
-
-
-}
 
 function makeEncodingSelect(key) {
-
 
     let select = document.createElement("select")
     select.className = "paletteEncodingSelect"

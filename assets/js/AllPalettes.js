@@ -236,73 +236,79 @@ async function initAllPalette() {
 
     if (allPalettes.length === 0) {
 
+        if (useServer) {
+            palSources = []
+            getPaletteList()
+        } else {
 
-        for (let i = 0; i < palSources.length; i++) {
 
-            await loadSavedPalette(`assets/tempData/palettes/${palSources[i]}.json`);
+            for (let i = 0; i < palSources.length; i++) {
+
+                await loadSavedPalette(`assets/tempData/palettes/${palSources[i]}.json`);
+            }
         }
-    }
 
-    const container = document.getElementById("AllPaletteCont");
+        const container = document.getElementById("AllPaletteCont");
 
-    container.innerHTML = "";
+        container.innerHTML = "";
 
-    // container.appendChild(setAddNewMenu());
+        // container.appendChild(setAddNewMenu());
 
-    for (let i = 0; i < allPalettes.length; i++) {
-        let tdiv = document.createElement("div");
-        tdiv.className = "allPaletteRow";
-        tdiv.setAttribute("number", i)
-        tdiv.setAttribute("name", palSources[i])
+        for (let i = 0; i < allPalettes.length; i++) {
+            let tdiv = document.createElement("div");
+            tdiv.className = "allPaletteRow";
+            tdiv.setAttribute("number", i)
+            tdiv.setAttribute("name", palSources[i])
 
-        let canContainer = document.createElement("div");
-        tdiv.innerHTML = `<p>${palSources[i]}</p>`;
-        canContainer.className = "canPreview";
+            let canContainer = document.createElement("div");
+            tdiv.innerHTML = `<p>${palSources[i]}</p>`;
+            canContainer.className = "canPreview";
 
-        tdiv.appendChild(canContainer);
-        let arrowDiv = document.createElement("div");
+            tdiv.appendChild(canContainer);
+            let arrowDiv = document.createElement("div");
 
-        arrowDiv.className = "paletteArrowDiv";
-        arrowDiv.innerHTML = `
+            arrowDiv.className = "paletteArrowDiv";
+            arrowDiv.innerHTML = `
               <img src ="assets/images/buttons/show.png" style="position: absolute;top: -23px;right: -2px;width: 18px;height: auto;cursor: pointer" onclick="showThisPalette('${palSources[i]}',${i})" >
             <img src ="assets/images/buttons/right-arrow.png" style=";cursor: pointer" onclick="selectThisPalette('${palSources[i]}',${i})" >`
-        tdiv.appendChild(arrowDiv);
-        container.appendChild(tdiv);
+            tdiv.appendChild(arrowDiv);
+            container.appendChild(tdiv);
 
-        dragElement(tdiv)
-        // bindingMouseOver(tdiv)
-        let allMarks = allPalettes[i].encodings.range.marks;
+            dragElement(tdiv)
+            // bindingMouseOver(tdiv)
+            let allMarks = allPalettes[i].encodings.range.marks;
 
-        let MarkNames = Object.keys(allMarks)
-        let n = MarkNames.length;
-        let offx = 14
-        let offy = 3
+            let MarkNames = Object.keys(allMarks)
+            let n = MarkNames.length;
+            let offx = 14
+            let offy = 3
 
-        if (offx * n + subW > prevW || offy * n + subH > prevH) {
-            offx = (prevW - subW) / n
-            offy = (prevH - subH) / n
-        }
-        canContainer.style.width = prevW + "px"
-        canContainer.style.height = prevH + "px"
-
-        for (let j = n - 1; j > -1; j--) {
-            let b64 = allMarks[MarkNames[j]].source
-            if (allMarks[MarkNames[j]].source === undefined) {
-                b64 = allMarks[MarkNames[j]].proto.canvas
-                allMarks[MarkNames[j]].source = allMarks[MarkNames[j]].proto.canvas
+            if (offx * n + subW > prevW || offy * n + subH > prevH) {
+                offx = (prevW - subW) / n
+                offy = (prevH - subH) / n
             }
-            let tcan = cloneCanvas(b64)
-            tcan.style.width = `${subW}px`
-            tcan.style.height = `${subH}px`
+            canContainer.style.width = prevW + "px"
+            canContainer.style.height = prevH + "px"
 
-            tcan.style.left = `${offx + (j * offx)}px`
-            tcan.style.top = `${(prevH - subH) - (j * offy)}px`
+            for (let j = n - 1; j > -1; j--) {
+                let b64 = allMarks[MarkNames[j]].source
+                if (allMarks[MarkNames[j]].source === undefined) {
+                    b64 = allMarks[MarkNames[j]].proto.canvas
+                    allMarks[MarkNames[j]].source = allMarks[MarkNames[j]].proto.canvas
+                }
+                let tcan = cloneCanvas(b64)
+                tcan.style.width = `${subW}px`
+                tcan.style.height = `${subH}px`
+
+                tcan.style.left = `${offx + (j * offx)}px`
+                tcan.style.top = `${(prevH - subH) - (j * offy)}px`
 
 
-            canContainer.appendChild(tcan);
+                canContainer.appendChild(tcan);
+            }
+
+
         }
-
-
     }
 
     let tPalCont = document.getElementById("paletteCont")
@@ -377,7 +383,7 @@ async function loadSavedPalette(url) {
 
 // megaPalettes[`temp${n}`] = jsonObj
 
-return palette
+    return palette
 }
 
 
@@ -500,19 +506,23 @@ function appendSingle(palette, name) {
     canContainer.className = "canPreview";
 
 
-
     let arrowDiv = document.createElement("div");
 
     arrowDiv.className = "paletteArrowDiv";
     arrowDiv.innerHTML = `
-              <img src ="assets/images/buttons/show.png" style="position: absolute;top: -23px;right: -2px;width: 18px;height: auto;cursor: pointer" onclick="showThisPalette('${name}',${palSources.length-1})" >
-            <img src ="assets/images/buttons/right-arrow.png" style=";cursor: pointer" onclick="selectThisPalette('${name}',${palSources.length-1})" >`
+              <img src ="assets/images/buttons/show.png" style="position: absolute;top: -23px;right: -2px;width: 18px;height: auto;cursor: pointer" onclick="showThisPalette('${name}',${palSources.length - 1})" >
+            <img src ="assets/images/buttons/right-arrow.png" style=";cursor: pointer" onclick="selectThisPalette('${name}',${palSources.length - 1})" >`
 
     tdiv.appendChild(canContainer);
     tdiv.appendChild(arrowDiv);
 
 
-    container.insertBefore(tdiv, container.firstChild.nextSibling);
+    if (container.firstChild) {
+        container.insertBefore(tdiv,container.firstChild.nextSibling );
+    } else {
+        container.appendChild(tdiv);
+    }
+
 
 
     // container.appendChild(tdiv);
