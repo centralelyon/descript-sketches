@@ -644,22 +644,53 @@ function toColor(canvas, r, g, b, threshold) {
     return res;
 }
 
-function otherGrab(can, coords, featherAmount = 5) {
+function otherGrab(can, coords, featherAmount = 3) {
     let src = opencv.imread(can);
+    console.log(coords);
     opencv.cvtColor(src, src, opencv.COLOR_RGBA2RGB, 0);
+
+
+    const MIN_DIM = 300;
+    const scale = Math.max(1, MIN_DIM / Math.min(src.cols, src.rows));
+    const MIN_SIZE = 10
 
     let mask = new opencv.Mat();
     let bgdModel = new opencv.Mat();
     let fgdModel = new opencv.Mat();
 
-    const x = Math.max(0, Math.min(coords.x, src.cols - 1));
-    const y = Math.max(0, Math.min(coords.y, src.rows - 1));
-    const w = Math.max(1, Math.min(coords.w, src.cols - x));
-    const h = Math.max(1, Math.min(coords.h, src.rows - y));
+    let x = Math.max(0, Math.min(coords[0], src.cols - 1));
+    let y = Math.max(0, Math.min(coords[1], src.rows - 1));
+
+    let w = Math.max(MIN_SIZE, Math.min(coords[2], src.cols - x));
+    let h = Math.max(MIN_SIZE, Math.min(coords[3], src.rows - y));
+
+    if (scale > 1) {
+        const newSize = new opencv.Size(Math.round(src.cols * scale), Math.round(src.rows * scale));
+        opencv.resize(src, src, newSize, 0, 0, opencv.INTER_CUBIC);
+        x = Math.round(x * scale);
+        y = Math.round(y * scale);
+        w = Math.round(w * scale);
+        h = Math.round(h * scale);
+    }
+
+
     let rect = new opencv.Rect(x, y, w, h);
 
-    opencv.grabCut(src, mask, rect, bgdModel, fgdModel, 5, opencv.GC_INIT_WITH_RECT);
 
+
+    try {
+        opencv.grabCut(src, mask, rect, bgdModel, fgdModel, 7, opencv.GC_INIT_WITH_RECT);
+    } catch (e) {
+        if (typeof e === 'number') {
+            console.error('grabCut failed:', opencv.exceptionFromPtr(e).msg);
+        } else {
+            console.error('grabCut failed:', e);
+        }
+        throw e;
+    }
+
+
+    // hsv.delete(); bgMask.delete(); lower.delete(); upper.delete();
     let alpha = new opencv.Mat(mask.rows, mask.cols, opencv.CV_8UC1, new opencv.Scalar(0));
     const maskData = mask.data;
     const alphaData = alpha.data;
@@ -680,16 +711,24 @@ function otherGrab(can, coords, featherAmount = 5) {
         dstData[i * 4 + 3] = alphaData[i];
     }
 
-    opencv.imshow(can, dst);
+    let cropped = dst.roi(rect);
+
+    let outCanvas = document.createElement('canvas');
+    outCanvas.width = w;
+    outCanvas.height = h;
+    opencv.imshow(outCanvas, cropped);
+
+    // opencv.imshow(can, dst);
 
     src.delete();
     mask.delete();
+    cropped.delete();
     bgdModel.delete();
     fgdModel.delete();
     alpha.delete();
     dst.delete();
 
-    return can;
+    return outCanvas;
 }
 
 
@@ -823,8 +862,6 @@ function recolorCanvasLAB(canvas, targetRGB, strength = 1.0) {
 
 
     let src = opencv.imread(canvas);
-
-
 
     let originalLab = new opencv.Mat();
 

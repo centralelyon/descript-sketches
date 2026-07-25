@@ -3,7 +3,7 @@ const serverBaseUrl = "https://randou.liris.cnrs.fr/vizapi/descript-sketches/"
 let username = ""
 let password = ""
 let credentials = ""
-let useServer = false
+let useServer = true
 let imgList
 
 async function getPaletteList() {

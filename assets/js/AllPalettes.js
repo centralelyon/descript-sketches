@@ -210,9 +210,6 @@ function selectThisPalette(name, num) {
         }
     }
     megaGlyph[name].color = makeColorScale(name, "")
-    // makeMarkTree()
-
-    // displayPalette(name)
 
     if (tflag) {
         tdrawRefactor()
@@ -222,9 +219,7 @@ function selectThisPalette(name, num) {
         } else if (displayMode == "Cartesian Grid") {
             updateSvg(true)
         }
-
     }
-
 }
 
 async function initAllPalette() {
