@@ -1316,7 +1316,7 @@ function getImage(url) {
 
         img.onload = () => resolve(img);
         img.onerror = () => reject(new Error(`Failed to load image: ${url}`));
-        img.crossOrigin = "use-credentials"
+        // img.crossOrigin = "use-credentials"
         img.src = url;
     });
 }

@@ -167,12 +167,8 @@ async function showThisPalette(name, num) {
         // await allPalettes[num].originImg.decode()
 
         resetView(tcan, allPalettes[num].originImg)
-
-
         displayAllMarksInSvg(allPalettes[num].sampling)
     }
-
-
 }
 
 

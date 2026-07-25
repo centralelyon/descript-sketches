@@ -466,7 +466,7 @@ function getBBox(canvas) {
     let contours2 = new opencv.MatVector();
     let hierarchy2 = new opencv.Mat();
 
-// You can try more different parameters
+// TODO: fine-tune parameters
     opencv.findContours(src, contours, hierarchy, opencv.RETR_TREE, opencv.CHAIN_APPROX_SIMPLE);
 
 
@@ -821,16 +821,10 @@ function recolorCanvasLAB(canvas, targetRGB, strength = 1.0) {
 
     const [targetR, targetG, targetB] = targetRGB;
 
-    // =========================
-    // READ CANVAS
-    // =========================
 
     let src = opencv.imread(canvas);
 
-    // =========================
-    // ORIGINAL LAB
-    // Preserve original luminance/details
-    // =========================
+
 
     let originalLab = new opencv.Mat();
 
@@ -842,9 +836,7 @@ function recolorCanvasLAB(canvas, targetRGB, strength = 1.0) {
     let originalL = originalChannels.get(0);
     let alpha = originalChannels.get(3);
 
-    // =========================
-    // GRAYSCALE BASE
-    // =========================
+
 
     let gray = new opencv.Mat();
 
@@ -862,9 +854,7 @@ function recolorCanvasLAB(canvas, targetRGB, strength = 1.0) {
 
     opencv.merge(grayChannels, grayRGBA);
 
-    // =========================
-    // RGBA -> LAB
-    // =========================
+
 
     let lab = new opencv.Mat();
 
@@ -879,9 +869,6 @@ function recolorCanvasLAB(canvas, targetRGB, strength = 1.0) {
     let A = channels.get(1);
     let B = channels.get(2);
 
-    // =========================
-    // VISIBLE PIXELS MASK
-    // =========================
 
     let visibleMask = new opencv.Mat();
 
@@ -893,9 +880,7 @@ function recolorCanvasLAB(canvas, targetRGB, strength = 1.0) {
         opencv.THRESH_BINARY
     );
 
-    // =========================
-    // TARGET COLOR
-    // =========================
+
 
     let targetMat = new opencv.Mat(
         src.rows,
@@ -913,10 +898,6 @@ function recolorCanvasLAB(canvas, targetRGB, strength = 1.0) {
 
     let targetA = targetChannels.get(1);
     let targetBChannel = targetChannels.get(2);
-
-    // =========================
-    // BASE BLEND
-    // =========================
 
     let mixedA = new opencv.Mat();
     let mixedB = new opencv.Mat();
@@ -939,17 +920,14 @@ function recolorCanvasLAB(canvas, targetRGB, strength = 1.0) {
         mixedB
     );
 
-    // =========================
-    // DARK LINES BOOST
-    // stronger recolor on dark regions
-    // =========================
+
 
     let luminanceMask = new opencv.Mat();
 
-    // invert luminance
+
     opencv.bitwise_not(L, luminanceMask);
 
-    // soften transitions
+
     opencv.GaussianBlur(
         luminanceMask,
         luminanceMask,
@@ -960,7 +938,7 @@ function recolorCanvasLAB(canvas, targetRGB, strength = 1.0) {
     let darkA = new opencv.Mat();
     let darkB = new opencv.Mat();
 
-    // stronger target influence
+
     opencv.addWeighted(
         mixedA,
         0.6,
@@ -979,17 +957,15 @@ function recolorCanvasLAB(canvas, targetRGB, strength = 1.0) {
         darkB
     );
 
-    // apply extra boost on dark areas
+
     darkA.copyTo(mixedA, luminanceMask);
     darkB.copyTo(mixedB, luminanceMask);
 
-    // apply only visible pixels
+
     mixedA.copyTo(A, visibleMask);
     mixedB.copyTo(B, visibleMask);
 
-    // =========================
-    // REBUILD LABA
-    // =========================
+
 
     let merged = new opencv.Mat();
     let mergedChannels = new opencv.MatVector();
@@ -1001,23 +977,13 @@ function recolorCanvasLAB(canvas, targetRGB, strength = 1.0) {
 
     opencv.merge(mergedChannels, merged);
 
-    // =========================
-    // LAB -> RGBA
-    // =========================
-
     let result = new opencv.Mat();
 
     opencv.cvtColor(merged, result, opencv.COLOR_Lab2RGBA);
 
-    // =========================
-    // WRITE BACK TO CANVAS
-    // =========================
+
 
     opencv.imshow(canvas, result);
-
-    // =========================
-    // CLEANUP
-    // =========================
 
     src.delete();
 
