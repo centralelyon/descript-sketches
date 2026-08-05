@@ -19,6 +19,11 @@ async function getPaletteList() {
 
         if (!t.preloadName) {
             t.originImg = await getImage(t.originImg)
+        } else {
+            if (t.preloadName !== "") {
+                t.originImg = preload[t.preloadName];
+
+            }
         }
 
 

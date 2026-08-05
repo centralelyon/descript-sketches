@@ -1097,7 +1097,6 @@ function updateDatabinding(elem) {
 }
 
 
-
 function getKeyByValue(object, value) {
     return Object.keys(object).find(key => object[key] === value);
 }
@@ -1141,7 +1140,7 @@ function switchForce() {
 async function updateSvg(changedEncoding = false) {
 
 
-    if (displayMode === "Cartesian Grid") {
+    if (displayMode === "1") {
 
         if (changedEncoding) {
             showExample()
@@ -1358,6 +1357,22 @@ function drawScatter(svg, viewport, data, encodings, order, tmarks, update) {
 
 }
 
+function highlightFromData(d, flag) {
+    for (const [name, mark] of Object.entries(megaGlyph)) {
+        if (mark.dataColumn !== '' && mark.dataColumn !== 'none') {
+            let allVals = [...new Set(chartDataset.data.map(d => d[megaGlyph[name].dataColumn]))]
+            let n = allVals.indexOf(d[mark.dataColumn])
+
+            let markId = Object.keys(megaPalettes[name].encodings.range.marks)[n]
+            bordercan(name, markId, flag,d)
+        } else {
+            let markId = Object.keys(megaPalettes[name].encodings.range.marks)[0]
+            bordercan(name, markId, flag,d)
+        }
+
+    }
+}
+
 async function drawForce(svg, viewport, data, encodings, order, tmarks, update) {
 
     let size = svg.node().getBoundingClientRect()
@@ -1397,7 +1412,16 @@ async function drawForce(svg, viewport, data, encodings, order, tmarks, update) 
             })
             .attr("y", (d, i) => {
                 return d.y
+            }).on("mouseover", function (e, d) {
+
+                highlightFromData(d, true)
+
             })
+            .on("mouseout", function (e, d) {
+                highlightFromData(d, false)
+            })
+
+
     } else {
         if (simulation) {
             simulation.stop()
@@ -1475,13 +1499,11 @@ async function tdrawRefactor(update = false) {
     let viewport
     if (!update) {
         svg.selectAll("*").remove();
-        viewport  = svg.append("g")
+        viewport = svg.append("g")
             .attr("id", "viewport")
     } else {
         viewport = svg.select("#viewport")
     }
-
-
 
 
     const zoom = d3.zoom()

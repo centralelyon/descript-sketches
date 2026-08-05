@@ -290,7 +290,6 @@ function hidePaletteContainer() {
 function updateAnchorCont(container) {
 
 
-
     container.innerHTML = ''
 
     for (const [key, value] of Object.entries(global_anchors)) {
@@ -1003,6 +1002,60 @@ function updateMarksBindingDisplay(palette) {
 
 }
 
+function hideMarkInVis(e, div) {
+    if (displayMode === "0") {
+        d3.select("#viewport").selectAll(".selectedImageMark").classed("selectedImageMark", false);
+    } else if (displayMode === "1") {
+        d3.select("#bigCartesian").selectAll(".selectedImageMark").classed("selectedImageMark", false);
+    }
+}
+
+function highlightMarkInVis(e, div) {
+    let name = div.getAttribute("key")
+    let mark = div.getAttribute("number")
+
+    let imgs = d3.select("#viewport").selectAll("image")
+    if (displayMode === "1") {
+        imgs = d3.select("#bigCartesian").selectAll("image")
+    }
+
+    if (megaGlyph[name].dataColumn !== "") {
+
+        let n = Object.keys(megaPalettes[name].encodings.range.marks).indexOf(mark)
+        let allVals = [...new Set(chartDataset.data.map(d => d[megaGlyph[name].dataColumn]))]
+
+        imgs.each(function (d) {
+            if (displayMode === "0") {
+                if (d[megaGlyph[name].dataColumn] === allVals[n]) {
+                    d3.select(this).classed("selectedImageMark", true);
+                }
+            } else if (displayMode === "1") {
+                if (d[name] === mark) {
+                    d3.select(this).classed("selectedImageMark", true);
+                }
+            }
+        });
+    } else {
+
+        if (displayMode === "0") {
+            let n = Object.keys(megaPalettes[name].encodings.range.marks).indexOf(mark)
+            if (n === 0) {
+                imgs.classed("selectedImageMark", true);
+            }
+        } else if (displayMode === "1") {
+            imgs.each(function (d) {
+
+                if (d[name] === mark) {
+                    d3.select(this).classed("selectedImageMark", true);
+
+                }
+            });
+        }
+    }
+
+
+}
+
 function makeRangeMark(key, tdiv, value, typesDisplay) {
 
     const marks = value.encodings.range.marks
@@ -1028,6 +1081,13 @@ function makeRangeMark(key, tdiv, value, typesDisplay) {
 
         let tsvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
         tmark.appendChild(tsvg)
+
+        tmark.addEventListener("mouseover", (event) => {
+            highlightMarkInVis(event, tmark);
+        });
+        tmark.addEventListener("mouseout", (event) => {
+            hideMarkInVis(event, tmark);
+        });
 
         dragElement3(tmark)
         tsvg = d3.select(tsvg)
@@ -1201,6 +1261,33 @@ function getMarkRange(key) {
 }
 
 
+function showBinding(e, div) {
+
+    let data = div.innerHTML
+    let name= div.parentElement.getAttribute("id").replace("bind-","")
+
+    if (displayMode === "0") {
+        let imgs = d3.select("#viewport").selectAll("image")
+
+        imgs.each(function (d) {
+            if (d[megaGlyph[name].dataColumn] === data) {
+                d3.select(this).classed("selectedImageMark", true);
+            }
+        })
+
+    } else if (displayMode === "1") {
+        let imgs = d3.select("#bigCartesian").selectAll("image")
+        imgs.each(function (d) {
+            if (d[name] === mark) {
+                d3.select(this).classed("selectedImageMark", true);
+            }
+        })
+    }
+}
+
+
+
+
 function makeBindingDisplay(container, palette, dataColumn) {
     if (!isCont(chartDataset.data, dataColumn)) {
         let set = new Set(chartDataset.data.map(d => d[dataColumn]));
@@ -1216,6 +1303,16 @@ function makeBindingDisplay(container, palette, dataColumn) {
             nameDiv.setAttribute("class", "dataBindingLabel")
             nameDiv.setAttribute("data", uniques[i])
             nameDiv.innerHTML = uniques[i]
+
+
+            nameDiv.addEventListener("mouseover", (event) => {
+                showBinding(event, nameDiv);
+            });
+
+            nameDiv.addEventListener("mouseout", (event) => {
+                hideMarkInVis(event, nameDiv);
+            });
+
 
             if (i > nMarks - 1) {
                 nameDiv.style.color = "#EF5350"
@@ -1346,7 +1443,6 @@ function changeScale(palette, type) {
 
     updateSvg()
 }
-
 
 
 function makeEncodingSelect(key) {

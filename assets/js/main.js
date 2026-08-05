@@ -277,7 +277,7 @@ function selectTab(tab) {
         t.classList.remove('active');
     });
 
-    displayMode = tab.innerHTML
+    displayMode = tab.getAttribute("num");
 
     switchPalette()
 
@@ -1044,18 +1044,18 @@ function showCart() {
 function switchPalette() {
 
 
-    if (displayMode === "Visualization") {
+    if (displayMode === "0") {
 
         palSwitch = false
         hideSample()
         hideCart()
         showViz()
-    } else if (displayMode === "Cartesian Grid") {
+    } else if (displayMode === "1") {
 
         hideSample()
         hideViz()
         showCart()
-    } else if (displayMode === "Source Image") {
+    } else if (displayMode === "2") {
         palSwitch = true
         d3.select("#sampleDisplay").style("display", "none").selectAll("image").remove();
         displaySample()
@@ -1297,7 +1297,7 @@ function initState(state) {
 }
 
 async function preloadBgImg() {
-    const preloadList = ['week05', 'week15']
+    const preloadList = ['week15', 'week05']
     const preloadUrl = [
         "assets/tempData/sources/Giorgia_DearData_15_Back.jpg",
         "assets/tempData/sources/Stefanie_DearData_05+back.jpg"

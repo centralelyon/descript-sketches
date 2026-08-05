@@ -1,6 +1,6 @@
 let allPalettes = []
 
-let displayMode = "Visualization"
+let displayMode = "0"
 
 let palSources = [
     // "test"
@@ -155,8 +155,7 @@ function setAddNewMenu() {
 
 
 async function showThisPalette(name, num) {
-    console.log(num);
-    console.log(allPalettes[num].originImg);
+
 
     let tab = document.querySelector(`.tab[num="2"]`);
 
@@ -221,9 +220,9 @@ function selectThisPalette(name, num) {
     if (tflag) {
         tdrawRefactor()
     } else {
-        if (displayMode == "Visualization") {
+        if (displayMode == "0") {
             updateSvg()
-        } else if (displayMode == "Cartesian Grid") {
+        } else if (displayMode == "1") {
             updateSvg(true)
         }
 
@@ -359,19 +358,19 @@ async function loadSavedPalette(url) {
         value.canvas = await convertToCanvas(value.canvas)
     }
 
+    if (palette.preloadName) {
+        if (palette.preloadName !== "") {
+            palette.originImg = preload[palette.preloadName];
 
-    if (palette.originImg) {
+        }
+    } else if (palette.originImg) {
         if (palette.originImg !== "") {
             const img = new Image();
             img.src = palette.originImg;
             palette.originImg = img;
         }
     }
-    if (palette.preloadName) {
-        if (palette.preloadName !== "") {
-            palette.originImg = preload[palette.preloadName];
-        }
-    }
+
     // console.log(preload[palette.preloadName]);
     // console.log(palette.originImg);
 
@@ -457,7 +456,7 @@ function bindingMouseOver(elem) {
         let tempNum = +elem.getAttribute("number");
 
         if (tempNum !== undefined) {
-            if (displayMode === "Visualization") {
+            if (displayMode === "0") {
 
                 if (allPalettes[tempNum].originImg) {
                     displaySample()
@@ -481,7 +480,7 @@ function bindingMouseOver(elem) {
     function hideOrigin() {
         tempKey = undefined
         tempNum = undefined
-        if (displayMode === "Visualization") {
+        if (displayMode === "0") {
             hideSample()
         }
     }
@@ -518,11 +517,10 @@ function appendSingle(palette, name) {
 
 
     if (container.firstChild) {
-        container.insertBefore(tdiv,container.firstChild.nextSibling );
+        container.insertBefore(tdiv, container.firstChild.nextSibling);
     } else {
         container.appendChild(tdiv);
     }
-
 
 
     // container.appendChild(tdiv);

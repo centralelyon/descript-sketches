@@ -76,6 +76,7 @@ function showExample() {
             .attr("height", coords.itemSize)
             .datum(cart[i])
             .on("mouseover", function (e, d) {
+
                 for (const [name, mark] of Object.entries(d)) {
 
                     bordercan(name, mark, true)
@@ -94,17 +95,30 @@ function showExample() {
 
 }
 
-function bordercan(name, mark, highlight) {
+function bordercan(name, mark, highlight, d) {
     let can = document.getElementById(`canvas_${name}_${mark}`)
 
-    if (highlight) {
-        can.style.border = "1px solid red"
-        can.style.backgroundColor = "rgba(255,78,78,0.63)"
+    if (can) {
+        if (highlight) {
+            can.style.border = "1px solid red"
+            can.style.backgroundColor = "rgba(255,78,78,0.63)"
+        } else {
+            can.style.border = "1px solid #424242"
+            can.style.backgroundColor = ""
+        }
     } else {
-        can.style.border = "1px solid #424242"
-        can.style.backgroundColor = ""
-    }
+        let cont = document.getElementById(`bind-${name}`)
 
+        can = cont.querySelector(`div[data='${d[megaGlyph[name].dataColumn]}']`)
+        console.log(can);
+        if (highlight) {
+            can.style.border = "1px solid red"
+            can.style.backgroundColor = "rgba(255,78,78,0.63)"
+        } else {
+            can.style.border = ""
+            can.style.backgroundColor = ""
+        }
+    }
 }
 
 function getGridLayout(
@@ -270,6 +284,7 @@ function drawAllCollageAnchor() {
     }
 
 }
+
 function addPaletteInfoToCollage(palette, name) {
 
     let svg = d3.select("#composition")
@@ -391,12 +406,7 @@ function addPaletteInfoToCollage(palette, name) {
 
                             setAnchorOnAllMarks(tFrom.name, offx, offy, nAnchor, 0, name)
                             setAnchorOnAllMarks(name, offx, offy, nAnchor, 0, tFrom.name)
-                            // setAnchorOnAllMarks(tFrom.name, offx, offy, name)
 
-                            // Preserve whichever of the two marks already has an
-                            // established tree (so we don't re-root something that's
-                            // already correctly positioned elsewhere); if neither does,
-                            // tFrom becomes root, same as the original convention.
                             resolveAnchorTree(findRoot(tFrom.name))
                             nAnchor++
                             anchoring = false
@@ -412,11 +422,6 @@ function addPaletteInfoToCollage(palette, name) {
                         }
 
                     } else {
-                        // Clicked the same mark again before completing the anchor.
-                        // Treat this as repositioning the pending "from" point rather
-                        // than spawning a stray "to" circle: the old code referenced
-                        // tTo.name here (not set for this pair yet) and never reset
-                        // the anchoring state, so the tool got stuck mid-flow.
                         let [px, py] = d3.pointer(e, svg.node())
                         let offx = px - drawnMarks[name].x
                         let offy = py - drawnMarks[name].y
@@ -437,7 +442,13 @@ function addPaletteInfoToCollage(palette, name) {
                                 .on("drag", dragged)
                                 .on("end", dragended))
 
-                        tFrom = {x: drawnMarks[name].x + offx, y: drawnMarks[name].y + offy, rx: offx, ry: offy, name: name}
+                        tFrom = {
+                            x: drawnMarks[name].x + offx,
+                            y: drawnMarks[name].y + offy,
+                            rx: offx,
+                            ry: offy,
+                            name: name
+                        }
                     }
                 }
 
@@ -553,7 +564,6 @@ function addPaletteInfoToCollage(palette, name) {
     }
     // }
 }
-
 
 
 function hidePalette() {

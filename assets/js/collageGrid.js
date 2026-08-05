@@ -362,7 +362,6 @@ function makeCollageFromData(palettes, order, marks, row, gridMark = undefined) 
             let mark = marks[order[j]][row[dataBinding[order[j]]]];
             if (gridMark !== undefined) {
                 mark =  megaPalettes[order[j]].encodings.range.marks[gridMark[order[j]]]
-
             }
 
             let can = mark.proto.canvas
