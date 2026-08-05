@@ -236,20 +236,10 @@ async function addRectSample(x, y, width, height) {
 }
 
 
-function newAddGrabbedSample(points) {
-    let can = document.getElementById("inVis")
-
-
-    let ncan = grabCutFromSelection(can, points)
-
-    document.getElementById("paletteMarks").append(ncan)
-
-}
-
 async function addGrabSample(x, y, width, height) {
 
-
     let coords = curateCoordinates(x, y, width, height);
+    coords = screenRectToWorld(coords)
 
 
     let can = document.getElementById("inVis")
@@ -263,50 +253,41 @@ async function addGrabSample(x, y, width, height) {
 
     tcan.crossOrigin = "anonymous";
 
-    tcan.width = trec.width
-    tcan.height = trec.height
+    tcan.width = coords[2]
+    tcan.height = coords[3]
 
-    tcont.drawImage(can, 0, 0, trec.width, trec.height);
+    let tx = coords[0] / reducedDim[0]
+    let ty = coords[1] / reducedDim[1]
 
+    let tw = coords[2] / reducedDim[0]
+    let th = coords[3] / reducedDim[1]
 
-    let tx = trec.width
-    let ty = trec.height
-
-
-    let grabbed = otherGrab(tcan, coords);
-
-    /*
-        let tcan = document.createElement('canvas');
-        // let tcont = tcan.getContext('2d');
+    let imgW = currImg.width
+    let imgH = currImg.height
 
 
-        tcan.width = coords[2]
-        tcan.height = coords[3]
-    */
+    tcont.drawImage(currImg,
+        tx * imgW,
+        ty * imgH,
+        tw * imgW,
+        th * imgH,
+        0,
+        0,
+        coords[2],
+        coords[3]);
 
 
-    let marks = document.getElementById("marks")
+    // let tx = trec.width
+    // let ty = trec.height
+
+    // document.body.appendChild(tcan);
 
 
-    /*
-        let rCoords = [coords[0] / tx,
-            coords[1] / ty,
-            coords[2] / tx,
-            coords[3] / ty]
-    */
+    let container = document.getElementById("marksHolder")
 
+    // container.appendChild(tcan);
 
-    /*    let placeHolder = document.createElement("canvas");
-        let tcont = placeHolder.getContext('2d');
-
-        placeHolder.width = currImg.naturalWidth
-        placeHolder.height = currImg.naturalHeight
-
-        tcont.drawImage(currImg, 0, 0)
-
-
-        let grabbed = otherGrab(placeHolder, rCoords)
-        marks.append(grabbed)*/
+    let grabbed = otherGrab(tcan, [1, 1, coords[2] - 1, coords[3] - 1]);
 
 
     let tres = {
@@ -320,8 +301,20 @@ async function addGrabSample(x, y, width, height) {
         ry: coords[1] / ty,
         rWidth: coords[2] / tx,
         rHeight: coords[3] / ty,
-
     }
+
+
+    let n = Object.keys(currSampleList).length
+    currSampleList[`mark${n}`] = tres
+
+
+    let tdiv = document.createElement("div");
+    tdiv.style.position = "relative";
+    tdiv.innerHTML = `<img onclick="removeMark('mark${n}',this)" src="assets/images/buttons/del.png" style="width: 12px;cursor: pointer;position: absolute;top: 3px;left: 3px"> `
+    tdiv.appendChild(grabbed);
+    container.appendChild(tdiv)
+
+    dragElement4(tdiv)
 
 
 }
@@ -574,7 +567,7 @@ function movePalette2Available() {
         }
 
         if (useServer) {
-            uploadPalette(tpal,name)
+            uploadPalette(tpal, name)
         } else {
             savePal(tpal, name)
         }

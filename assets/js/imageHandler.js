@@ -1,4 +1,5 @@
-let reducedDim = [0,0]
+let reducedDim = [0, 0]
+let tfileName = ""
 
 function loadImg(src) {
 
@@ -24,10 +25,10 @@ function loadImg(src) {
         let th = Math.min(im.height, viewDim[1])
         // let tw = Math.min(im.width, th * tRatio)
 
-        let tw = Math.min( (im.width *th) / im.height, viewDim[0])
+        let tw = Math.min((im.width * th) / im.height, viewDim[0])
 
 
-        reducedDim = [tw,th]
+        reducedDim = [tw, th]
 
         cont.drawImage(im, 0, 0, tw, th);
 
@@ -61,10 +62,10 @@ function fitCanvas(canvas, image) {
     let th = Math.min(image.height, viewDim[1])
     // let tw = Math.min(im.width, th * tRatio)
 
-    let tw = Math.min( (image.width *th) / image.height, viewDim[0])
+    let tw = Math.min((image.width * th) / image.height, viewDim[0])
 
 
-    reducedDim = [tw,th]
+    reducedDim = [tw, th]
 
     canvas.width = viewDim[0]
     canvas.style.width = viewDim[0] + 'px';
@@ -145,6 +146,11 @@ function importImg(e) {
         switchMode("rect")
 
     }
+
+    let split = e.target.files[0].name.split(".")
+
+    split.pop()
+    tfileName = split.join(".")
     reader.readAsDataURL(e.target.files[0]);
 }
 

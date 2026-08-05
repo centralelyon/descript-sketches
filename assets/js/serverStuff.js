@@ -65,12 +65,20 @@ async function uploadPalette(palette, name) {
     } else {
 
         if (tsrc.includes("data:image")) {
-            pushImage(palette.originImg, name)
+
+            if (tfileName !== "") {
+
+                if (!imgList.map(d => d.name).includes(tfileName)) {
+
+                    pushImage(palette.originImg, tfileName)
+
+                }
+                tt.originImg = serverBaseUrl + "images/" + tfileName + ".png"
+            }
+        } else {
+            tt.originImg = serverBaseUrl + "images/" + name + ".png"
         }
-
-        tt.originImg = serverBaseUrl + "images/" + name + ".png"
     }
-
 
     const blob = new Blob([JSON.stringify(tt)], {type: "application/json"})
     const data = new FormData();
@@ -101,12 +109,22 @@ function pushImage(img, name) {
     const data = new FormData();
 
 
-    data.append('file', {
-        uri: img.src,
-        name: name,
-        type: 'image/png',
-    })
+    const blob = new Blob([img], {type: 'image/png'})
 
+    /*
+        data.append('file', {
+            uri: img.src,
+            name: name + "png",
+            type: 'image/png',
+        })
+    */
+
+
+    data.append(
+        "file",
+        blob,
+        name + ".png"
+    );
 
     fetch(serverBaseUrl + "images", {
         method: 'POST',

@@ -166,12 +166,8 @@ async function showThisPalette(name, num) {
         // await allPalettes[num].originImg.decode()
 
         resetView(tcan, allPalettes[num].originImg)
-
-
         displayAllMarksInSvg(allPalettes[num].sampling)
     }
-
-
 }
 
 
@@ -213,9 +209,6 @@ function selectThisPalette(name, num) {
         }
     }
     megaGlyph[name].color = makeColorScale(name, "")
-    // makeMarkTree()
-
-    // displayPalette(name)
 
     if (tflag) {
         tdrawRefactor()
@@ -225,9 +218,7 @@ function selectThisPalette(name, num) {
         } else if (displayMode == "1") {
             updateSvg(true)
         }
-
     }
-
 }
 
 async function initAllPalette() {
