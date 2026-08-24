@@ -2,7 +2,7 @@ let reducedDim = [0, 0]
 let tfileName = ""
 
 function loadImg(src) {
-
+    console.log(src);
     let im = new Image();
     im.crossOrigin = "Anonymous";
 
@@ -34,6 +34,8 @@ function loadImg(src) {
 
         // fillSvg(sampleData)
         // addAPalette()
+
+        resetView(can, im)
 
     };
 

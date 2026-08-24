@@ -46,7 +46,7 @@ function enableZoomPan(canvas, image) {
     canvas.addEventListener("wheel", (e) => {
         e.preventDefault();
 
-        const factor = e.deltaY < 0 ? 1.1 : 1 / 1.1;
+        const factor = e.deltaY < 0 ? 1.03 : 1 / 1.03;
 
         const rect = canvas.getBoundingClientRect();
 
@@ -77,9 +77,14 @@ function enableZoomPan(canvas, image) {
 
     window.addEventListener("mousemove", (e) => {
         if (!isDragging) return;
-        sampling = false
-        const dx = e.clientX - lastX;
-        const dy = e.clientY - lastY;
+        sampling = false;
+
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+
+        const dx = (e.clientX - lastX) * scaleX;
+        const dy = (e.clientY - lastY) * scaleY;
 
         x0 -= dx / zoom;
         y0 -= dy / zoom;
@@ -87,7 +92,7 @@ function enableZoomPan(canvas, image) {
         lastX = e.clientX;
         lastY = e.clientY;
 
-        redraw(canvas,image);
+        redraw(canvas, image);
     });
 
     window.addEventListener("mouseup", () => {

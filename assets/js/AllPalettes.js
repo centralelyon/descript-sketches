@@ -14,12 +14,15 @@ let palSources = [
     "week05_empty",
     "week05_full",
     "week05_star",
-    "week05_type"
+    "week05_type",
     // "week26_circle",
     // "sudoku_time",
     // "sudoku_level",
     // "sudoku_hint",
     // "sudoku_mistake",
+    "palette_week47_attributes",
+    "palette_week47_duration",
+    "palette_week47_smell"
 
 ]
 
@@ -52,7 +55,7 @@ function cleanSlate() {
     document.getElementById("MarksPaletteList").innerHTML = ''
 
     d3.select("#composition").selectAll("*").remove()
-    d3.select("#fakePreviewSvg").selectAll("*").remove()
+    // d3.select("#fakePreviewSvg").selectAll("*").remove()
 
 }
 

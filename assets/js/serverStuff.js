@@ -3,7 +3,7 @@ const serverBaseUrl = "https://randou.liris.cnrs.fr/vizapi/descript-sketches/"
 let username = ""
 let password = ""
 let credentials = ""
-let useServer = false
+let useServer = true
 let imgList
 
 async function getPaletteList() {
@@ -12,13 +12,14 @@ async function getPaletteList() {
 
 
     for (const [key, value] of Object.entries(palettes)) {
-
+        console.log(value.name);
         let t = await loadStateFromJson(serverBaseUrl + "palettes/" + value.name)
 
-        console.log(t);
 
         if (!t.preloadName) {
-            t.originImg = await getImage(t.originImg)
+            // console.log(t.originImg);
+            // if (!t.originImg.includes("Giorgia_DearData_47_Back"))
+                t.originImg = await getImage(t.originImg)
         } else {
             if (t.preloadName !== "") {
                 t.originImg = preload[t.preloadName];
@@ -69,14 +70,15 @@ async function uploadPalette(palette, name) {
             if (tfileName !== "") {
 
                 if (!imgList.map(d => d.name).includes(tfileName)) {
-
-                    pushImage(palette.originImg, tfileName)
+                    await pushImage(palette.originImg, tfileName)
 
                 }
-                tt.originImg = serverBaseUrl + "images/" + tfileName + ".png"
+                tt.originImg = serverBaseUrl + "images/" + tfileName
             }
         } else {
-            tt.originImg = serverBaseUrl + "images/" + name + ".png"
+            console.log(tt.originImg);
+            // await pushImage(palette.originImg, name)
+            tt.originImg = currImg.src
         }
     }
 
@@ -99,8 +101,56 @@ async function uploadPalette(palette, name) {
     })
 }
 
+async function pushImage(img, name) {
+    if (credentials === "") {
+        await login();
+    }
+    img.crossOrigin = "anonymous";
 
-function pushImage(img, name) {
+
+
+    const MAX_SIZE = 1024;
+
+    let width = img.naturalWidth;
+    let height = img.naturalHeight;
+
+    if (width > MAX_SIZE || height > MAX_SIZE) {
+        const scale = Math.min(
+            MAX_SIZE / width,
+            MAX_SIZE / height
+        );
+
+        width = Math.round(width * scale);
+        height = Math.round(height * scale);
+    }
+
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(img, 0, 0, width, height);
+
+
+    const blob = await new Promise(resolve =>
+        canvas.toBlob(resolve, "image/png")
+    );
+
+    const data = new FormData();
+    data.append("file", blob, name + ".png");
+
+    await fetch(serverBaseUrl + "images", {
+        method: "POST",
+        headers: {
+            "Authorization": `Basic ${credentials}`,
+        },
+        body: data
+    });
+}
+
+
+/*
+async function pushImage(img, name) {
 
     if (credentials === "") {
         login()
@@ -111,14 +161,6 @@ function pushImage(img, name) {
 
     const blob = new Blob([img], {type: 'image/png'})
 
-    /*
-        data.append('file', {
-            uri: img.src,
-            name: name + "png",
-            type: 'image/png',
-        })
-    */
-
 
     data.append(
         "file",
@@ -126,11 +168,13 @@ function pushImage(img, name) {
         name + ".png"
     );
 
-    fetch(serverBaseUrl + "images", {
+    await fetch(serverBaseUrl + "images", {
         method: 'POST',
         headers: {
             "Authorization": `Basic ${credentials}`,
         },
         body: data
     })
-}
+
+
+}*/

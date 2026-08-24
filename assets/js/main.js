@@ -160,6 +160,7 @@ async function loadEx2() {
 
         loadImg(sampleImageList[i])
 
+
     }
 }
 
@@ -1175,7 +1176,7 @@ async function loadStateFromJson(source) {
     } else {
         throw new Error("source must be a File or a URL string");
     }
-
+    console.log(json);
     const pending = [];
 
     const state = JSON.parse(json, (key, value) => {
@@ -1244,7 +1245,7 @@ async function loadStateFromJson(source) {
 function initState(state) {
     cleanSlate()
 
-    console.log(state);
+
     megaPalettes = state.megaPalettes
     megaGlyph = state.megaGlyph
     dataBinding = state.dataBinding
@@ -1292,6 +1293,7 @@ function initState(state) {
     document.getElementById("layout-" + layout).click()
 
     updateDotsAndSvgs()
+    tdrawRefactor()
 
 
 }
@@ -1303,6 +1305,7 @@ async function preloadBgImg() {
         "assets/tempData/sources/Stefanie_DearData_05+back.jpg"
     ]
     for (let i = 0; i < preloadList.length; i++) {
+
         preload[preloadList[i]] = await getImage(preloadUrl[i])
 
     }
