@@ -1,0 +1,56 @@
+[
+    {
+        "mtime": "Fri, 24 Jul 2026 13:00:54 GMT",
+        "name": "iris.csv",
+        "path": ".",
+        "size": 3975,
+        "type": "file",
+        "columns": 5,
+        "rows": 150
+    },
+    {
+        "mtime": "Fri, 24 Jul 2026 13:09:19 GMT",
+        "name": "mnist.csv",
+        "path": ".",
+        "size": 3510,
+        "type": "file",
+        "columns": 3,
+        "rows": 200
+    },
+    {
+        "mtime": "Wed, 10 Jun 2026 12:39:21 GMT",
+        "name": "penguins.csv",
+        "path": ".",
+        "size": 13506,
+        "type": "file",
+        "columns": 7,
+        "rows": 344
+    },
+    {
+        "mtime": "Fri, 24 Jul 2026 13:00:54 GMT",
+        "name": "tips.csv",
+        "path": ".",
+        "size": 9729,
+        "type": "file",
+        "columns": 7,
+        "rows": 244
+    },
+    {
+        "mtime": "Fri, 24 Jul 2026 13:00:54 GMT",
+        "name": "titanic.csv",
+        "path": ".",
+        "size": 60302,
+        "type": "file",
+        "columns": 12,
+        "rows": 891
+    },
+    {
+        "mtime": "Wed, 10 Jun 2026 12:39:21 GMT",
+        "name": "week26.csv",
+        "path": ".",
+        "size": 4652,
+        "type": "file",
+        "columns": 8,
+        "rows": 100
+    }
+]

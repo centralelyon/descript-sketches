@@ -1,4 +1,6 @@
-let dataList = ["week15.csv", "week26.csv", "penguins.csv", 'iris.csv', 'titanic.csv', 'tips.csv']
+const DATASET_DIRECTORY = "assets/tempData/datasets/";
+const DATASET_MANIFEST = `${DATASET_DIRECTORY}datasets.json`;
+let dataList = []
 
 
 Array.prototype.sample = function () {
@@ -41,14 +43,15 @@ async function updateDataset() {
     // cleanSlate()
     let dataset = document.getElementById("availableData").value
 
-    chartDataset.name = dataset
-    if (dataset === "penguins.csv" || dataset === "titanic.csv" || dataset === "tips.csv" || dataset === "iris.csv") {
-        await loadDataset(`assets/tempData/datasets/${dataset}`)
-    } else if (dataset === "week15.csv") {
-        chartDataset.data = fakeWeek15()
-    } else if (dataset === "week26.csv") {
-        chartDataset.data = fakeWeek26()
+    if (!dataset) {
+        return
+    }
 
+    chartDataset.name = dataset
+    if (dataset === "week15.csv") {
+        chartDataset.data = fakeWeek15()
+    } else {
+        await loadDataset(`${DATASET_DIRECTORY}${dataset}`)
     }
 
     fillAxis()
@@ -88,15 +91,59 @@ function fakeWeek15() {
     return dataset
 }
 
-function fillSidePanel() {
+async function loadAvailableDatasets() {
+    try {
+        const response = await fetch(DATASET_DIRECTORY);
+        if (!response.ok) {
+            throw new Error(`Response status: ${response.status}`);
+        }
+
+        const html = await response.text();
+        const doc = new DOMParser().parseFromString(html, "text/html");
+        const csvFiles = Array.from(doc.querySelectorAll("a"))
+            .map(anchor => anchor.getAttribute("href"))
+            .filter(Boolean)
+            .map(href => decodeURIComponent(href.split("/").pop().split("?")[0].split("#")[0]))
+            .filter(filename => filename.toLowerCase().endsWith(".csv"));
+
+        dataList = Array.from(new Set(csvFiles))
+            .sort((a, b) => a.localeCompare(b))
+            .map(name => ({name}));
+    } catch (directoryError) {
+        try {
+            const manifest = await fetch(DATASET_MANIFEST).then(response => response.json());
+            dataList = manifest
+                .filter(entry => entry.name && entry.name.toLowerCase().endsWith(".csv"))
+                .sort((a, b) => a.name.localeCompare(b.name));
+        } catch (manifestError) {
+            console.warn("Could not read dataset directory listing or manifest.", directoryError, manifestError);
+            dataList = []
+        }
+    }
+
+    return dataList
+}
+
+
+async function fillSidePanel() {
 
 
     let opts = ""
     let select = document.getElementById("availableData")
     select.innerHTML = ""
+
+    if (!dataList.length) {
+        await loadAvailableDatasets()
+    }
+
     for (let i = 0; i < dataList.length; i++) {
 
-        opts += `<option value="${dataList[i]}">${dataList[i]}</option>`
+        const dataset = dataList[i];
+        const label = dataset.rows !== undefined && dataset.columns !== undefined
+            ? `${dataset.name} (${dataset.rows} rows, ${dataset.columns} cols)`
+            : dataset.name;
+
+        opts += `<option value="${dataset.name}">${label}</option>`
     }
 
     select.innerHTML = opts
