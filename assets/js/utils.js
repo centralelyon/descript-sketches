@@ -201,6 +201,12 @@ function dumpObject(obj) {
 
 }
 
+function constrainWidth(width, height, maxWidth = 100) {
+    if (width <= maxWidth) return { width, height };
+    const ratio = maxWidth / width;
+    return { width: maxWidth, height: height * ratio };
+}
+
 function revive(value) {
     if (value?.__type === "canvas") {
         const img = new Image(); // TODO change to canvas

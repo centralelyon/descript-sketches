@@ -1109,15 +1109,7 @@ function switchLayout(elem, type) {
 
     elem.classList.add("selectedLayout")
 
-
-    if (type === "force") {
-        layout = type
-    } else if (type === "grid") {
-        layout = type
-    } else if (type === "scatterplot") {
-        layout = type
-
-    }
+    layout = type
 
 
     tdrawRefactor(true)
@@ -1201,6 +1193,9 @@ async function updateSvg(changedEncoding = false) {
 
 function drawAxis(svg, data, xScale, yScale, marginH, marginV) {
 
+    let viewport = d3.select("#viewport")
+
+    viewport.selectAll(".axis").remove();
 
     const xAxis = d3.axisBottom(xScale);
     const yAxis = d3.axisLeft(yScale);
@@ -1210,13 +1205,13 @@ function drawAxis(svg, data, xScale, yScale, marginH, marginV) {
     let height = size.height
 
 
-    svg.append("g")
+    viewport.append("g")
         .attr("class", "axis")
         .attr("transform", `translate(0,${height - marginV})`)
         .call(xAxis);
 
 // Draw y-axis
-    svg.append("g")
+    viewport.append("g")
         .attr("class", "axis")
         .attr("transform", `translate(${marginH},0)`)
         .call(yAxis);
@@ -1364,14 +1359,170 @@ function highlightFromData(d, flag) {
             let n = allVals.indexOf(d[mark.dataColumn])
 
             let markId = Object.keys(megaPalettes[name].encodings.range.marks)[n]
-            bordercan(name, markId, flag,d)
+            bordercan(name, markId, flag, d)
         } else {
             let markId = Object.keys(megaPalettes[name].encodings.range.marks)[0]
-            bordercan(name, markId, flag,d)
+            bordercan(name, markId, flag, d)
         }
 
     }
 }
+
+
+async function drawDrag(svg, viewport, data, encodings, order, tmarks, update) {
+
+    let size = svg.node().getBoundingClientRect()
+
+    let xScale, yScale
+
+    let xAx = chartAxis.x
+    let yAx = chartAxis.y
+
+    const tdata = deepClone(data).map(d => ({...d}));
+
+    if (xAx !== "none" || yAx !== "none") {
+        [xScale, yScale] = getScales(svg, tdata)
+
+    }
+
+
+    let timages
+
+    tdata.forEach((d, i) => {
+        d.canvas = makeCollageFromData(encodings, order, tmarks, d);
+        d.radius = 0.5 * Math.sqrt(d.canvas.width * d.canvas.height);
+        d.x = (xScale !== undefined ? xScale(d[xAx]) : (size.width / 2) + 20 * Math.random());
+        d.y = (yScale !== undefined ? yScale(d[yAx]) : (size.height / 2) + 20 * Math.random());
+    });
+
+
+    const drag = d3.drag()
+        .on("start", function (event, d) {
+            d3.select(this).interrupt();          // <-- cancel any in-flight/pending transition
+            d3.select(this).raise().classed("dragging", true);
+
+            // read current rendered position instead of trusting d.x/d.y
+            const currentX = +d3.select(this).attr("x");
+            const currentY = +d3.select(this).attr("y");
+
+            d._dragOffsetX = event.x - currentX;
+            d._dragOffsetY = event.y - currentY;
+
+            if (typeof simulation !== "undefined" && simulation) {
+                simulation.alphaTarget(0.3).restart();
+                d.fx = currentX;
+                d.fy = currentY;
+            }
+        })
+        .on("drag", function (event, d) {
+            d.x = event.x - d._dragOffsetX;
+            d.y = event.y - d._dragOffsetY;
+
+            d3.select(this)
+                .attr("x", d.x)
+                .attr("y", d.y);
+
+            if (typeof simulation !== "undefined" && simulation) {
+                d.fx = d.x;
+                d.fy = d.y;
+            }
+        })
+        .on("end", function (event, d) {
+            d3.select(this).classed("dragging", false);
+
+            if (typeof simulation !== "undefined" && simulation) {
+                simulation.alphaTarget(0);
+                d.fx = d.x;
+                d.fy = d.y;
+            }
+        });
+
+
+    if (!update) {
+
+
+
+        timages = viewport.selectAll("dots")
+            .data(tdata)
+            .enter()
+            .append("image")
+            .attr("xlink:href", d =>
+                d.canvas.toDataURL("image/png"))
+            .attr("x", (d, i) => {
+                return d.x
+            })
+            .attr("y", (d, i) => {
+                return d.y
+            }).on("mouseover", function (e, d) {
+
+                highlightFromData(d, true)
+
+            })
+            .on("mouseout", function (e, d) {
+                highlightFromData(d, false)
+            }).call(drag);
+
+
+        simulation = d3.forceSimulation(tdata)
+            .force("collide", d3.forceCollide(d => d.radius + 2))
+            .on("tick", ticked);
+
+
+
+    } else {
+        if (simulation) {
+            simulation.stop()
+            simulation = undefined
+        }
+
+
+        d3.selectAll(".axis").remove()
+        await d3.select("#viewport").selectAll("image")
+            .data(tdata)
+            .transition().delay(100)
+            .attr("x", (d, i) => {
+                return tdata[i].x
+            })
+            .attr("y", (d, i) => {
+                return tdata[i].y
+            }).end()
+
+        simulation = d3.forceSimulation(tdata)
+            .force("collide", d3.forceCollide(d => d.radius + 2))
+            .on("tick", ticked);
+
+
+        timages = d3.select("#viewport").selectAll("image")
+        timages.call(drag);
+
+
+        console.log(tdata);
+    }
+
+
+
+
+
+    // const simulation = d3.forceSimulation(data)
+    //     .force("collide", d3.forceCollide().radius(d => 18).strength(0.000000001))
+    //     .force("x", d3.forceX().strength(0.0000025))
+    //     .force("y", d3.forceY().strength(0.0000032))
+    //     .on("tick", ticked)
+
+
+    function ticked() {
+        if (layout == "force") {
+            timages
+                .attr("x", d => d.x)
+                // .attr("x", d => clampVal(d.x, 0, size.width))
+                // .attr("y", d => clampVal(d.y, 0, size.height))
+                .attr("y", d => d.y)
+        }
+    }
+
+
+}
+
 
 async function drawForce(svg, viewport, data, encodings, order, tmarks, update) {
 
@@ -1401,6 +1552,49 @@ async function drawForce(svg, viewport, data, encodings, order, tmarks, update) 
     if (!update) {
 
 
+        const drag = d3.drag()
+            .on("start", function (event, d) {
+                d3.select(this).interrupt();          // <-- cancel any in-flight/pending transition
+                d3.select(this).raise().classed("dragging", true);
+
+                // read current rendered position instead of trusting d.x/d.y
+                const currentX = +d3.select(this).attr("x");
+                const currentY = +d3.select(this).attr("y");
+
+                d._dragOffsetX = event.x - currentX;
+                d._dragOffsetY = event.y - currentY;
+
+                if (typeof simulation !== "undefined" && simulation) {
+                    simulation.alphaTarget(0.3).restart();
+                    d.fx = currentX;
+                    d.fy = currentY;
+                }
+            })
+            .on("drag", function (event, d) {
+                d.x = event.x - d._dragOffsetX;
+                d.y = event.y - d._dragOffsetY;
+
+                d3.select(this)
+                    .attr("x", d.x)
+                    .attr("y", d.y);
+
+                if (typeof simulation !== "undefined" && simulation) {
+                    d.fx = d.x;
+                    d.fy = d.y;
+                }
+            })
+            .on("end", function (event, d) {
+                d3.select(this).classed("dragging", false);
+
+                if (typeof simulation !== "undefined" && simulation) {
+                    simulation.alphaTarget(0);
+                    d.fx = d.x;
+                    d.fy = d.y;
+                }
+            });
+
+
+
         timages = viewport.selectAll("dots")
             .data(tdata)
             .enter()
@@ -1419,15 +1613,13 @@ async function drawForce(svg, viewport, data, encodings, order, tmarks, update) 
             })
             .on("mouseout", function (e, d) {
                 highlightFromData(d, false)
-            })
+            }).call(drag);
 
 
     } else {
         if (simulation) {
             simulation.stop()
             simulation = undefined
-            console.log(tdata[0].vx);
-            console.log(tdata[60].x);
         }
         d3.selectAll(".axis").remove()
         await d3.select("#viewport").selectAll("image")
@@ -1486,8 +1678,10 @@ async function drawForce(svg, viewport, data, encodings, order, tmarks, update) 
     function ticked() {
         if (layout == "force") {
             timages
-                .attr("x", d => clampVal(d.x, 0, size.width))
-                .attr("y", d => clampVal(d.y, 0, size.height))
+                .attr("x", d => d.x)
+                // .attr("x", d => clampVal(d.x, 0, size.width))
+                // .attr("y", d => clampVal(d.y, 0, size.height))
+                .attr("y", d => d.y)
         }
     }
 
@@ -1508,6 +1702,17 @@ async function tdrawRefactor(update = false) {
 
     const zoom = d3.zoom()
         .scaleExtent([0.2, 10])
+        .filter((event) => {
+            // only allow zoom/pan gestures while shift is held
+            if (!event.shiftKey) return false;
+
+/*            const startingOnImage =
+                (event.type === "mousedown" || event.type === "touchstart" || event.type === "pointerdown") &&
+                event.target.tagName === "image";
+            if (startingOnImage) return false;*/
+
+            return !event.ctrlKey && !event.button;
+        })
         .on("zoom", (event) => {
             viewport.attr("transform", event.transform);
         });
@@ -1536,6 +1741,8 @@ async function tdrawRefactor(update = false) {
         drawScatter(svg, viewport, data, encodings, order, tmarks, update)
     } else if (layout === "force") {
         drawForce(svg, viewport, data, encodings, order, tmarks, update)
+    } else if (layout === "drag") {
+        drawDrag(svg, viewport, data, encodings, order, tmarks, update)
     }
 
 

@@ -1418,3 +1418,12 @@ p, h3, h4, h5, img {
     border-radius: 5px;
     outline: 2px solid red;
 }
+
+#viewport image {
+    transform-box: fill-box;
+    transform: translate(-50%, -50%);
+}
+
+#viewport image:hover {
+cursor: grab;
+}

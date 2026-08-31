@@ -304,10 +304,11 @@
         <!--        <div style="display: flex;">-->
         <div class="tabHolder">
             <div class="tab active" num="0" onclick="selectTab(this)"> <img style="height: 15px" src="assets/images/buttons/chart.png"/> Visualization</div>
-            <div class="tab" num="1" onclick="selectTab(this)"> <img style="height: 15px" src="assets/images/buttons/grid.png"/> Cartesian Grid</div>
+            <div class="tab" num="1" onclick="selectTab(this)"> <img style="height: 15px" src="assets/images/buttons/grid.png"/>  Generative </div>
             <div class="tab" num="2" onclick="selectTab(this)"> <img style="height: 15px" src="assets/images/buttons/show.png"/>  Source Image</div>
 
             <!--            <div class="tab">Settings</div>-->
+            <p style="font-weight: 600;float: right;position: absolute;top: 43px;left: 7px"> HOLD SHIFT TO ZOOM/PAN</p>
         </div>
 
         <div id="samplingHolder" style="display: none;width: 100%;z-index: 2">
@@ -394,7 +395,7 @@
                         <div id="layout-force" onclick="switchLayout(this, 'force')" class="selectedLayout">Force</div>
                         <div id="layout-grid" onclick="switchLayout(this, 'grid')">Grid</div>
                         <div id="layout-scatterplot" onclick="switchLayout(this, 'scatterplot')"> Scatterplot</div>
-                        <!--                    <div onclick="switchLayout(this, 'Stack')"> Stack (wip)</div>-->
+<!--                                            <div onclick="switchLayout(this, 'drag')"> Drag</div>-->
                     </div>
                     <div id="optionsSandbox" style="display: flex;margin-top: -9px">
                         <div>

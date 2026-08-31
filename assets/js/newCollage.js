@@ -601,6 +601,7 @@ function delPalette(key) {
     delete megaPalettes[key]
     delete megaGlyph[key]
     delete dataBinding[key]
+    delete drawnMarks[key]
 
     if (Object.keys(megaPalettes).length > 0) {
         updateSvg()

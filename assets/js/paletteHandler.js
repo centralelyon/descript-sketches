@@ -1431,7 +1431,7 @@ function purgeAnchor(from, to, n) {
 }
 
 function changeScale(palette, type) {
-    const step = 0.1
+    const step = 0.03
 
 
     if (type === "-") {
@@ -1450,7 +1450,7 @@ function makeEncodingSelect(key) {
     let select = document.createElement("select")
     select.className = "paletteEncodingSelect"
     select.id = `${key}_encodingSelect`
-    select.innerHTML = ` <option value="new">*new*</option>  <option value="color">color</option>` + `<option value="size">size</option>` + `<option value="orientation">orientation</option>`
+    select.innerHTML = ` <option value="new">*new*</option>  <option value="color">color</option>` + `<option value="size">size</option>` + `<option value="orientation">orientation</option> <option value="opacity">opacity</option>\``
 
     select.onchange = function () {
         if (select.value !== "new") {

@@ -390,9 +390,16 @@ function makeCollageFromData(palettes, order, marks, row, gridMark = undefined) 
                 sc *= megaGlyph[order[j]].size.scale(row[megaGlyph[order[j]].size.dataColumn])
             }
 
-            let sourceW = mark.proto.canvas.width * sc
-            let sourceH = mark.proto.canvas.height * sc
 
+            let t = constrainWidth(mark.proto.canvas.width, mark.proto.canvas.height,75)
+            let sourceW =  t.width* sc
+            let sourceH = t.height* sc
+
+            let opacity = 1
+
+            if (megaGlyph[order[j]].opacity.dataColumn !== "" && megaGlyph[order[j]].opacity.dataColumn !== "none") {
+                opacity = megaGlyph[order[j]].opacity.scale(row[megaGlyph[order[j]].opacity.dataColumn])
+            }
 
             let rotDeg = ref.rotation || 0
             if (megaGlyph[order[j]].orientation &&
@@ -445,6 +452,7 @@ function makeCollageFromData(palettes, order, marks, row, gridMark = undefined) 
                 pivotRy = selfAnchor.ry
 
                 tcon.save()
+                tcon.globalAlpha = opacity
                 tcon.translate(pivotX, pivotY)
                 tcon.rotate(cumRot)
                 tcon.drawImage(can,
@@ -462,6 +470,7 @@ function makeCollageFromData(palettes, order, marks, row, gridMark = undefined) 
                 pivotRy = 0.5
 
                 tcon.save()
+                tcon.globalAlpha = opacity
                 tcon.translate(pivotX, pivotY)
                 tcon.rotate(cumRot)
                 tcon.drawImage(can,

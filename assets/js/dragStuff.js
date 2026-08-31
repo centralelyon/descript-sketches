@@ -43,7 +43,7 @@ function dragElement(elmnt) {
         document.onmousemove = elementDrag;
 
         if (!e.target.matches("img"))
-        tsvg.classList.add("dropArea")
+            tsvg.classList.add("dropArea")
     }
 
     function elementDrag(e) {
@@ -218,6 +218,8 @@ function dragElement2(elmnt) {
                 flag = true
             } else if (type === "orientation") {
                 megaGlyph[id]["orientation"] = makeOrrScale(id, key)
+            } else if (type === "opacity") {
+                megaGlyph[id]["opacity"] = makeOpScale(id, key)
             }
 
             updateSvg(flag)
@@ -266,12 +268,36 @@ function updateSelectEncoding(palette, key) {
         megaGlyph[palette]["size"] = makeSizeScale(palette, val)
     } else if (key === "orientation") {
         megaGlyph[palette]["orientation"] = makeOrrScale(palette, val)
+    } else if (key === "opacity") {
+        megaGlyph[palette]["opacity"] = makeOpScale(palette, val)
     }
 
     updateSvg()
 
 
 }
+
+function makeOpScale(id, key) {
+    let data = chartDataset.data
+
+    let scale
+
+    if (isCont(data, key)) {
+        scale = d3.scaleLinear(d3.extent(data.map(d => d[key])), [0.1, 1])
+    } else {
+        let uniques = [...new Set(data.map(d => d[key]))];
+
+        scale = d3.scalePoint()
+            .domain(uniques)
+            .range([0.1, 1]);
+    }
+
+    return {
+        dataColumn: key,
+        scale: scale
+    }
+}
+
 
 function makeOrrScale(id, key) {
     let data = chartDataset.data

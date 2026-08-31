@@ -1176,7 +1176,7 @@ async function loadStateFromJson(source) {
     } else {
         throw new Error("source must be a File or a URL string");
     }
-    console.log(json);
+    // console.log(json);
     const pending = [];
 
     const state = JSON.parse(json, (key, value) => {

@@ -112,7 +112,7 @@ function addASelectedPalette(key) {
     let propertyContainer = document.createElement("div");
     propertyContainer.className = "propertyContainer";
 
-    let options = makeColumnsSelect()
+    let options = makeColumnsSelect("all")
 
     // propertyContainer.innerHTML = `<div style="display: flex"><div class="dataSelectContainer" key="${key}" type="shape" style="display: flex;width: 123px"><p  style="font-weight: 500 ">Mark:</p><select oninput="updateSelectBind('${key}')" class="dataSelect" id="shape-${key}" style="width: 70px;height: 30px;padding: 0 8px">${options}</select></div><div style="display: inline-block" onclick="appendEncoding('${key}')"><img  style="width: 15px;cursor: pointer;border-radius: 10px;padding: 2px;border: 1px solid #424242" src="assets/images/buttons/plus.png"></div></div>`;
     propertyContainer.innerHTML = `<div style="display: flex"><div class="dataSelectContainer" key="${key}" type="shape" style=""><p  style=" ">Mark:</p><select oninput="updateSelectBind('${key}')" class="dataSelect" id="shape-${key}" style="">${options}</select></div></div>`;
@@ -131,8 +131,8 @@ function addASelectedPalette(key) {
 }
 
 
-function makeColumnsSelect() {
-    let options = "<option value='none'>none</option>";
+function makeColumnsSelect(label="none") {
+    let options = `<option value='none'>${label}</option>`;
 
     let columns = Object.keys(chartDataset.data[0])
 
@@ -207,6 +207,10 @@ function selectThisPalette(name, num) {
             scale: "",
         },
         intensity: {
+            dataColumn: "",
+            scale: "",
+        },
+        opacity: {
             dataColumn: "",
             scale: "",
         }
