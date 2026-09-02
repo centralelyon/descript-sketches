@@ -306,6 +306,7 @@
             <div class="tab active" num="0" onclick="selectTab(this)"> <img style="height: 15px" src="assets/images/buttons/chart.png"/> Visualization</div>
             <div class="tab" num="1" onclick="selectTab(this)"> <img style="height: 15px" src="assets/images/buttons/grid.png"/>  Generative </div>
             <div class="tab" num="2" onclick="selectTab(this)"> <img style="height: 15px" src="assets/images/buttons/show.png"/>  Source Image</div>
+            <div class="tab" num="3" onclick="selectTab(this)"> <img style="height: 15px" src="assets/images/buttons/show.png"/> Template</div>
 
             <!--            <div class="tab">Settings</div>-->
             <p style="font-weight: 600;float: right;position: absolute;top: 43px;left: 7px"> HOLD SHIFT TO ZOOM/PAN</p>
@@ -331,11 +332,11 @@
                         <img id="selectedButton" src="assets/images/buttons/rect.png" class="lightBorder"
                              onclick="switchSampleSelect(this,'rect')" style=""/>
                     </div>
-                    <div class="buttonImg">
+   <!--                 <div class="buttonImg">
                         <img src="assets/images/buttons/lasso.png" class="lightBorder"
                              onclick="switchSampleSelect(this,'free')"
                              style=""/>
-                    </div>
+                    </div>-->
 
 
                     <div class="buttonImg">
@@ -395,7 +396,7 @@
                         <div id="layout-force" onclick="switchLayout(this, 'force')" class="selectedLayout">Force</div>
                         <div id="layout-grid" onclick="switchLayout(this, 'grid')">Grid</div>
                         <div id="layout-scatterplot" onclick="switchLayout(this, 'scatterplot')"> Scatterplot</div>
-<!--                                            <div onclick="switchLayout(this, 'drag')"> Drag</div>-->
+                                            <div onclick="switchLayout(this, 'draw')"> Draw</div>
                     </div>
                     <div id="optionsSandbox" style="display: flex;margin-top: -9px">
                         <div>
@@ -428,6 +429,11 @@
             <svg style="background-color:#fff;" id="bigCartesian">
 
             </svg>
+        </div>
+
+        <div id="templateHolder" style="height: 90%;display: none;background-color: #fff;">
+            <div style="display: flex;align-items: center;" id="templateContainer"></div>
+
         </div>
 
     </div>

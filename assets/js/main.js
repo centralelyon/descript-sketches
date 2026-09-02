@@ -13,6 +13,10 @@ let selectedCategory = "default";
 //use of Tableau10
 let catColors = ["#4e79a7", "#f28e2c", "#e15759", "#76b7b2", "#59a14f", "#edc949", "#af7aa1", "#ff9da7", "#9c755f", "#bab0ab"]
 
+let paletteType = "eval1"
+let participant= "p1"
+
+
 let mouseDown = 0
 let origin = null;
 let keymap = {}
@@ -45,6 +49,12 @@ let palSwitch = false
 
 
 const preload = {}
+
+const templateList = {
+    "iris": "https://randou.liris.cnrs.fr/files/descript/templates/iris.json",
+    "week15": "https://randou.liris.cnrs.fr/files/descript/templates/week15.json",
+    "week47": "https://randou.liris.cnrs.fr/files/descript/templates/week47.json"
+}
 
 const sampleImageList = [
     "https://dataroom.liris.cnrs.fr/vizvid/dear_data_images/Stefanie_DearData_26%2Bback.jpg",
@@ -1024,6 +1034,19 @@ function showCart() {
     showExample()
 }
 
+function showTemplate() {
+    let cont = document.getElementById("templateHolder");
+    cont.style.display = "block";
+    // showExample()
+    makeTemplateDisplay()
+}
+
+function hideTemplate() {
+    let cont = document.getElementById("templateHolder");
+    cont.style.display = "none";
+}
+
+
 /*function hideSample() {
 
     let canContainer = document.getElementById("canvasContainer");
@@ -1051,17 +1074,26 @@ function switchPalette() {
         hideSample()
         hideCart()
         showViz()
+        hideTemplate()
     } else if (displayMode === "1") {
 
         hideSample()
         hideViz()
         showCart()
+        hideTemplate()
     } else if (displayMode === "2") {
         palSwitch = true
         d3.select("#sampleDisplay").style("display", "none").selectAll("image").remove();
         displaySample()
         hideViz()
         hideCart()
+        hideTemplate()
+    } else if (displayMode === "3") {
+        // palSwitch = true
+        hideSample()
+        hideViz()
+        hideCart()
+        showTemplate()
     }
 
 }
@@ -1162,13 +1194,35 @@ async function handleStateFile() {
     initState(state)
 }
 
-async function loadStateFromJson(source) {
+async function loadStateFromJson(source, randou = false) {
     let json;
 
     if (source instanceof File) {
         json = await source.text();
     } else if (typeof source === "string") {
-        const response = await fetch(source);
+        let response
+        if(randou) {
+            if (credentials === "") {
+                login()
+            }
+             response = await     fetch(source, {
+                method: 'GET',
+                headers: {
+                    "Authorization": `Basic ${credentials}`
+
+                }
+            })
+
+
+        }else {
+             response = await fetch(source);
+        }
+
+
+
+
+
+
         if (!response.ok) {
             throw new Error(`Failed to load state: ${response.statusText}`);
         }
@@ -1335,4 +1389,35 @@ async function tempFixSavedPalette(file, preloadName) {
 
     download(dumpObject(json), file, "text/json");
 
+}
+
+
+function makeTemplateDisplay() {
+
+    let container = document.getElementById("templateContainer")
+
+    container.innerHTML = "";
+
+    for (const [key, value] of Object.entries(templateList)) {
+
+
+        let el = document.createElement("div");
+
+        el.style.backgroundImage = `url('assets/images/templates/${key}.png')`;
+        el.setAttribute('value', value);
+        el.onclick =loadTemplate
+        el.innerHTML = `<p> ${key} </p>`;
+        container.appendChild(el);
+
+    }
+}
+
+async function loadTemplate() {
+    const name = this.getAttribute("value")
+
+    let state = await loadStateFromJson( name,true);
+    initState(state)
+
+    let tab = document.querySelector(".tab[num='0']");
+    selectTab(tab)
 }

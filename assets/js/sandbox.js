@@ -8,6 +8,7 @@ let chartAxis = {
     y: "none"
 }
 
+let lines = []
 const defaultMinColor = "#a50026"
 const defaultMaxColor = "#313695"
 
@@ -1114,6 +1115,7 @@ function switchLayout(elem, type) {
 
     tdrawRefactor(true)
 
+
     // updateSvg()
 }
 
@@ -1218,6 +1220,148 @@ function drawAxis(svg, data, xScale, yScale, marginH, marginV) {
 }
 
 
+async function drawAlongLines(svg, viewport, lines, data, encodings, order, tmarks, update, alignToTangent = true) {
+    const lineGen = d3.line()
+        .x(p => p[0])
+        .y(p => p[1])
+        .curve(d3.curveCatmullRom.alpha(0.5))
+
+    const tempNodes = [] // scratch <path> elements created just for measurement, cleaned up below
+
+    const pathNodes = lines.map(line => {
+        if (line instanceof SVGPathElement) return line
+        if (line.node && typeof line.node === "function") return line.node() // d3 selection
+        // otherwise treat as raw points -> build a hidden path purely to measure it
+        const p = document.createElementNS("http://www.w3.org/2000/svg", "path")
+        p.setAttribute("d", lineGen(line))
+        p.style.display = "none"
+        svg.node().appendChild(p)
+        tempNodes.push(p)
+        return p
+    })
+
+    const lengths = pathNodes.map(p => p.getTotalLength())
+    const totalLength = d3.sum(lengths)
+
+    // cumulative length at the *start* of each line, so we know which line a given
+    // distance-along-everything falls on
+    const cumLengths = []
+    let acc = 0
+    for (const len of lengths) {
+        cumLengths.push(acc)
+        acc += len
+    }
+
+    let tdat = []
+    for (let i = 0; i < data.length; i++) {
+        let d = data[i]
+
+        let can = makeCollageFromData(encodings, order, tmarks, d)
+        let tw = can.width
+        let th = can.height
+
+        // target distance along the combined length of all lines, evenly spaced,
+        // centered within this item's slot
+        let target = totalLength * (i + 0.5) / data.length
+
+        let lineIdx = 0
+        while (lineIdx < cumLengths.length - 1 && target >= cumLengths[lineIdx + 1]) {
+            lineIdx++
+        }
+        let localDist = Math.min(Math.max(target - cumLengths[lineIdx], 0), lengths[lineIdx])
+
+        let point = pathNodes[lineIdx].getPointAtLength(localDist)
+
+        let angle = 0
+        if (alignToTangent) {
+            let behind = Math.max(localDist - 0.5, 0)
+            let ahead = Math.min(localDist + 0.5, lengths[lineIdx])
+            let p1 = pathNodes[lineIdx].getPointAtLength(behind)
+            let p2 = pathNodes[lineIdx].getPointAtLength(ahead)
+            angle = Math.atan2(p2.y - p1.y, p2.x - p1.x) * 180 / Math.PI
+        }
+
+        tdat.push({
+            can: can,
+            tw: tw,
+            th: th,
+            cx: point.x,
+            cy: point.y,
+            x: point.x - tw / 2,
+            y: point.y - th / 2,
+            angle: angle
+        })
+    }
+
+    tempNodes.forEach(n => n.remove())
+
+    if (update) {
+        if (simulation) {
+            simulation.stop()
+            simulation = undefined
+        }
+
+        d3.selectAll(".axis").remove()
+
+        d3.select("#viewport").selectAll("image").data(tdat)
+            .transition().duration(300)
+            .attr("x", d => d.x)
+            .attr("y", d => d.y)
+            .attr("transform", d => alignToTangent ? `rotate(${d.angle}, ${d.cx}, ${d.cy})` : null)
+
+    } else {
+        for (let i = 0; i < tdat.length; i++) {
+
+            let timages = viewport.selectAll("dots")
+                .data(tdat)
+                .enter()
+                .append("image")
+                .attr("xlink:href", d =>
+                    d.can.toDataURL("image/png"))
+                .attr("x", (d, i) => {
+                    return d.x
+                })
+                .attr("y", (d, i) => {
+                    return d.y
+                })
+                .attr("transform", d => alignToTangent ? `rotate(${d.angle}, ${d.cx}, ${d.cy})` : null)
+                .on("mouseover", function (e, d) {
+
+                    highlightFromData(d, true)
+
+                })
+                .on("mouseout", function (e, d) {
+                    highlightFromData(d, false)
+                })
+                // .call(drag);
+
+
+/*
+            await d3.select("#viewport").selectAll("image")
+                .data(tdata)
+                .transition().delay(100)
+                .attr("x", (d, i) => {
+                    return d.x
+                })
+                .attr("y", (d, i) => {
+                    return d.y
+                })
+                .end()
+*/
+
+
+            /*            viewport.append("image")
+                            .attr("xlink:href", tdat[i].can.toDataURL("image/png"))
+                            .attr("x", tdat[i].x)
+                            .attr("y", tdat[i].y)
+                            .attr("width", tdat[i].tw)
+                            .attr("height", tdat[i].th)
+                            .attr("transform", alignToTangent ? `rotate(${tdat[i].angle}, ${tdat[i].cx}, ${tdat[i].cy})` : null)*/
+        }
+    }
+}
+
+
 async function drawGrid(svg, viewport, data, encodings, order, tmarks, update) {
     let xCumul = 5
     let yCumul = 5
@@ -1271,8 +1415,6 @@ async function drawGrid(svg, viewport, data, encodings, order, tmarks, update) {
                 .attr("height", tdat[i].th)
         }
     }
-
-
 }
 
 function drawScatter(svg, viewport, data, encodings, order, tmarks, update) {
@@ -1441,7 +1583,6 @@ async function drawDrag(svg, viewport, data, encodings, order, tmarks, update) {
     if (!update) {
 
 
-
         timages = viewport.selectAll("dots")
             .data(tdata)
             .enter()
@@ -1466,7 +1607,6 @@ async function drawDrag(svg, viewport, data, encodings, order, tmarks, update) {
         simulation = d3.forceSimulation(tdata)
             .force("collide", d3.forceCollide(d => d.radius + 2))
             .on("tick", ticked);
-
 
 
     } else {
@@ -1498,9 +1638,6 @@ async function drawDrag(svg, viewport, data, encodings, order, tmarks, update) {
 
         console.log(tdata);
     }
-
-
-
 
 
     // const simulation = d3.forceSimulation(data)
@@ -1592,7 +1729,6 @@ async function drawForce(svg, viewport, data, encodings, order, tmarks, update) 
                     d.fy = d.y;
                 }
             });
-
 
 
         timages = viewport.selectAll("dots")
@@ -1706,10 +1842,10 @@ async function tdrawRefactor(update = false) {
             // only allow zoom/pan gestures while shift is held
             if (!event.shiftKey) return false;
 
-/*            const startingOnImage =
-                (event.type === "mousedown" || event.type === "touchstart" || event.type === "pointerdown") &&
-                event.target.tagName === "image";
-            if (startingOnImage) return false;*/
+            /*            const startingOnImage =
+                            (event.type === "mousedown" || event.type === "touchstart" || event.type === "pointerdown") &&
+                            event.target.tagName === "image";
+                        if (startingOnImage) return false;*/
 
             return !event.ctrlKey && !event.button;
         })
@@ -1734,7 +1870,7 @@ async function tdrawRefactor(update = false) {
             allColScales[encodings[i]] = {}
         }*/
 
-
+    offDraw(svg)
     if (layout === "grid") {
         drawGrid(svg, viewport, data, encodings, order, tmarks, update)
     } else if (layout === "scatterplot") {
@@ -1743,83 +1879,11 @@ async function tdrawRefactor(update = false) {
         drawForce(svg, viewport, data, encodings, order, tmarks, update)
     } else if (layout === "drag") {
         drawDrag(svg, viewport, data, encodings, order, tmarks, update)
+    } else if (layout === "draw") {
+        toggleLineDrawing(svg, lines)
+        drawAlongLines(svg, viewport, lines, data, encodings, order, tmarks, update)
     }
 
-
-    /*
-        if (gridMod) {
-
-            let xCumul = 5
-            let yCumul = 5
-
-            let width = 700
-
-            for (let i = 0; i < data.length; i++) {
-
-                let d = data[i]
-
-                let can = makeCollageFromData(encodings, order, tmarks, d)
-
-
-                let tw = can.width
-                let th = can.height
-
-                timages = svg.append("image")
-                    .attr("xlink:href", can.toDataURL("image/png"))
-                    .attr("x", xCumul)
-                    .attr("y", yCumul)
-                    .attr("width", tw)
-                    .attr("height", th)
-
-                xCumul += tw
-                if (xCumul + tw > width) {
-                    yCumul += th
-                    xCumul = 5
-                }
-
-            }
-        } else {
-
-
-            timages = svg.selectAll("dots")
-                .data(data)
-                .enter()
-                .append("image")
-                .attr("xlink:href", d =>
-                    makeCollageFromData(encodings, order, tmarks, d).toDataURL("image/png"))
-                .attr("x", d => {
-                    return xScale(d[chartAxis.x])
-                })
-                .attr("y", d => {
-                    return yScale(d[chartAxis.y]);
-                })
-
-
-            if (timages && !gridMod && useForce) {
-
-                const simulation = d3.forceSimulation(data)
-                    .force("collide", d3.forceCollide().radius(d => 18).strength(0.000000001))
-                    .force("x", d3.forceX().strength(0.0000025))
-                    .force("y", d3.forceY().strength(0.0000032))
-                    .on("tick", ticked)
-
-                let duration = 10
-
-                let t = d3.timer(elapsed => {
-                    let dt = elapsed / duration
-                    simulation.force("collide").strength(dt)
-                    if (dt >= 1.0) t.stop()
-                })//timer
-
-
-                function ticked() {
-
-                    timages
-                        .attr("x", d => clampVal(d.x, 0, size.width))
-                        .attr("y", d => clampVal(d.y, 0, size.height))
-                }//function ticked
-            }
-        }*/
 }
 
 
@@ -1862,4 +1926,64 @@ function switchSettings() {
 
 
     let container = document.getElementById('settingsSandbox')
+}
+
+
+function toggleLineDrawing(svg, lines) {
+    const node = svg.node()
+    node.__drawingEnabled = !node.__drawingEnabled
+
+    const lineGen = d3.line().curve(d3.curveBasis)
+
+    if (node.__drawingEnabled) {
+        let points = []
+        let path = null
+
+        svg.on("mousedown.draw", (event) => {
+            points = [d3.pointer(event, node)]
+            path = svg.append("path")
+                .attr("class", "drawn-line")
+                .attr("fill", "none")
+                .attr("stroke", "black")
+                .attr("stroke-width", 2)
+        })
+
+        svg.on("mousemove.draw", (event) => {
+            if (!path) return
+            points.push(d3.pointer(event, node))
+            path.attr("d", lineGen(points))
+        })
+
+        const finish = () => {
+            if (path && points.length > 1) lines.push(points)
+            path = null
+            points = []
+            // updateSvg(true)
+            tdrawRefactor(true)
+        }
+        svg.on("mouseup.draw", finish)
+        svg.on("mouseleave.draw", finish)
+
+        svg.style("cursor", "crosshair")
+    } else {
+        svg.on("mousedown.draw", null)
+            .on("mousemove.draw", null)
+            .on("mouseup.draw", null)
+            .on("mouseleave.draw", null)
+            .style("cursor", null)
+    }
+
+    return node.__drawingEnabled
+}
+
+
+function offDraw(svg) {
+    svg.on("mousedown.draw", null)
+        .on("mousemove.draw", null)
+        .on("mouseup.draw", null)
+        .on("mouseleave.draw", null)
+        .style("cursor", null)
+
+    svg.selectAll("path").remove();
+    svg.node().__drawingEnabled = false
 }

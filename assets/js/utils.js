@@ -170,6 +170,7 @@ function imageToBase64(img, type = 'image/png') {
     console.log(img.complete);
     canvas.width = img.width;
     canvas.height = img.height;
+    img.crossOrigin = 'anonymous';
 
     console.log(canvas.width);
     const ctx = canvas.getContext('2d');

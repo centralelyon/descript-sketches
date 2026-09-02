@@ -12,23 +12,33 @@ async function getPaletteList() {
 
 
     for (const [key, value] of Object.entries(palettes)) {
-        console.log(value.name);
-        let t = await loadStateFromJson(serverBaseUrl + "palettes/" + value.name)
+        let t
+        if (paletteType === "eval1" && (value.name.startsWith("week15") || value.name.startsWith("week47") || value.name.startsWith("week05")|| value.name.startsWith("p1"))) {
+            t = await loadStateFromJson(serverBaseUrl + "palettes/" + value.name)
 
 
-        if (!t.preloadName) {
-            // console.log(t.originImg);
-            // if (!t.originImg.includes("Giorgia_DearData_47_Back"))
-                t.originImg = await getImage(t.originImg)
-        } else {
-            if (t.preloadName !== "") {
-                t.originImg = preload[t.preloadName];
-
+        } else if (paletteType === "eval2") {
+            if (value.name.startsWith("week")) {
+                t = await loadStateFromJson(serverBaseUrl + "palettes/" + value.name)
             }
+
+        } else if (paletteType === "all") {
+            t = await loadStateFromJson(serverBaseUrl + "palettes/" + value.name)
         }
 
+        if (t !== undefined) {
 
-        appendSingle(t, value.name)
+            if (!t.preloadName) {
+                t.originImg = await getImage(t.originImg)
+            } else {
+                if (t.preloadName !== "") {
+                    t.originImg = preload[t.preloadName];
+
+                }
+            }
+            appendSingle(t, value.name)
+        }
+
     }
 
 }
@@ -106,7 +116,6 @@ async function pushImage(img, name) {
         await login();
     }
     img.crossOrigin = "anonymous";
-
 
 
     const MAX_SIZE = 1024;

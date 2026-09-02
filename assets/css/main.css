@@ -112,12 +112,12 @@ body {
 
 #selFlat {
     /*height: 100%;*/
-    width: 51.3%;
+    width: 45.3%;
     display: block;
     /*overflow-x: scroll;*/
     overflow-y: hidden;
     white-space: nowrap;
-    margin-left: 465px;
+    margin-left: 600px;
     margin-top: -33px;
     position: absolute;
 }
@@ -1426,4 +1426,43 @@ p, h3, h4, h5, img {
 
 #viewport image:hover {
 cursor: grab;
+}
+
+#templateHolder {
+    width: 97%;
+    border: solid #555 1px;
+    border-radius: 14px;
+    height: 75%;
+    padding-top: 50px;
+}
+
+
+#templateContainer div {
+    border: #555555 solid 1px;
+    margin: 5px;
+    filter: saturate(35%) brightness(70%) opacity(70%);
+    border-radius: 3px;
+    height: 162px;
+    width: 200px;
+    display: inline-block;
+    /*overflow: hidden;*/
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    cursor: pointer;
+    position: relative;
+}
+
+#templateContainer div:hover {
+    filter: none !important;
+    border: #498db4 solid 1px !important;
+
+}
+
+#templateContainer div p {
+    margin-top: 153px;
+    font-size: 24pt;
+    font-weight: 700;
+    text-align: center;
+    filter: saturate(100%) brightness(100%) opacity(100%);
 }
