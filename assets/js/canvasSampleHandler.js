@@ -208,7 +208,7 @@ async function addRectSample(x, y, width, height) {
     tdiv.appendChild(tcan);
     container.appendChild(tdiv)
 
-    dragElement4(tdiv)
+    // dragElement4(tdiv)
 
 
     // tdiv.onclick = editSample
@@ -314,7 +314,7 @@ async function addGrabSample(x, y, width, height) {
     tdiv.appendChild(grabbed);
     container.appendChild(tdiv)
 
-    dragElement4(tdiv)
+    // dragElement4(tdiv)
 
 
 }

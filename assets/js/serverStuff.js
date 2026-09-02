@@ -98,7 +98,7 @@ async function uploadPalette(palette, name) {
     data.append(
         "file",
         blob,
-        name + ".json"
+        participant+'_'+name + ".json"
     );
 
 

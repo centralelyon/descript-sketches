@@ -1227,7 +1227,9 @@ async function drawAlongLines(svg, viewport, lines, data, encodings, order, tmar
         .curve(d3.curveCatmullRom.alpha(0.5))
 
     const tempNodes = [] // scratch <path> elements created just for measurement, cleaned up below
+    console.log(update);
 
+    if (lines.length == 0) return
     const pathNodes = lines.map(line => {
         if (line instanceof SVGPathElement) return line
         if (line.node && typeof line.node === "function") return line.node() // d3 selection
@@ -1235,7 +1237,7 @@ async function drawAlongLines(svg, viewport, lines, data, encodings, order, tmar
         const p = document.createElementNS("http://www.w3.org/2000/svg", "path")
         p.setAttribute("d", lineGen(line))
         p.style.display = "none"
-        svg.node().appendChild(p)
+        viewport.node().appendChild(p)
         tempNodes.push(p)
         return p
     })
@@ -1252,7 +1254,7 @@ async function drawAlongLines(svg, viewport, lines, data, encodings, order, tmar
         acc += len
     }
 
-    let tdat = []
+    let tdat = deepClone(data).map(d => ({...d}));
     for (let i = 0; i < data.length; i++) {
         let d = data[i]
 
@@ -1281,16 +1283,17 @@ async function drawAlongLines(svg, viewport, lines, data, encodings, order, tmar
             angle = Math.atan2(p2.y - p1.y, p2.x - p1.x) * 180 / Math.PI
         }
 
-        tdat.push({
-            can: can,
-            tw: tw,
-            th: th,
-            cx: point.x,
-            cy: point.y,
-            x: point.x - tw / 2,
-            y: point.y - th / 2,
-            angle: angle
-        })
+        tdat[i].draw =
+            {
+                can: can,
+                tw: tw,
+                th: th,
+                cx: point.x,
+                cy: point.y,
+                x: point.x - tw / 2,
+                y: point.y - th / 2,
+                angle: angle
+            }
     }
 
     tempNodes.forEach(n => n.remove())
@@ -1305,9 +1308,11 @@ async function drawAlongLines(svg, viewport, lines, data, encodings, order, tmar
 
         d3.select("#viewport").selectAll("image").data(tdat)
             .transition().duration(300)
-            .attr("x", d => d.x)
-            .attr("y", d => d.y)
-            .attr("transform", d => alignToTangent ? `rotate(${d.angle}, ${d.cx}, ${d.cy})` : null)
+            .attr("x", d => d.draw.x)
+            .attr("y", d => d.draw.y)
+            .attr("transform", d => alignToTangent ? `rotate(${d.draw.angle}, ${d.draw.cx}, ${d.draw.cy})` : null)
+
+        let timages = d3.select("#viewport").selectAll("image")
 
     } else {
         for (let i = 0; i < tdat.length; i++) {
@@ -1319,35 +1324,35 @@ async function drawAlongLines(svg, viewport, lines, data, encodings, order, tmar
                 .attr("xlink:href", d =>
                     d.can.toDataURL("image/png"))
                 .attr("x", (d, i) => {
-                    return d.x
+                    return d.draw.x
                 })
                 .attr("y", (d, i) => {
-                    return d.y
+                    return d.draw.y
                 })
-                .attr("transform", d => alignToTangent ? `rotate(${d.angle}, ${d.cx}, ${d.cy})` : null)
-                .on("mouseover", function (e, d) {
+                .attr("transform", d => alignToTangent ? `rotate(${d.draw.angle}, ${d.draw.cx}, ${d.draw.cy})` : null)
+            /*                .on("mouseover", function (e, d) {
 
-                    highlightFromData(d, true)
+                                highlightFromData(d, true)
 
-                })
-                .on("mouseout", function (e, d) {
-                    highlightFromData(d, false)
-                })
-                // .call(drag);
+                            })
+                            .on("mouseout", function (e, d) {
+                                highlightFromData(d, false)
+                            })*/
+            // .call(drag);
 
 
-/*
-            await d3.select("#viewport").selectAll("image")
-                .data(tdata)
-                .transition().delay(100)
-                .attr("x", (d, i) => {
-                    return d.x
-                })
-                .attr("y", (d, i) => {
-                    return d.y
-                })
-                .end()
-*/
+            /*
+                        await d3.select("#viewport").selectAll("image")
+                            .data(tdata)
+                            .transition().delay(100)
+                            .attr("x", (d, i) => {
+                                return d.x
+                            })
+                            .attr("y", (d, i) => {
+                                return d.y
+                            })
+                            .end()
+            */
 
 
             /*            viewport.append("image")
@@ -1824,10 +1829,10 @@ async function drawForce(svg, viewport, data, encodings, order, tmarks, update) 
 
 }
 
-async function tdrawRefactor(update = false) {
+async function tdrawRefactor(update = false, anim = false) {
     let svg = d3.select("#fakePreviewSvg")
     let viewport
-    if (!update) {
+    if (!update && !anim) {
         svg.selectAll("*").remove();
         viewport = svg.append("g")
             .attr("id", "viewport")
@@ -1880,7 +1885,7 @@ async function tdrawRefactor(update = false) {
     } else if (layout === "drag") {
         drawDrag(svg, viewport, data, encodings, order, tmarks, update)
     } else if (layout === "draw") {
-        toggleLineDrawing(svg, lines)
+        toggleLineDrawing(svg,viewport, lines)
         drawAlongLines(svg, viewport, lines, data, encodings, order, tmarks, update)
     }
 
@@ -1929,19 +1934,20 @@ function switchSettings() {
 }
 
 
-function toggleLineDrawing(svg, lines) {
-    const node = svg.node()
-    node.__drawingEnabled = !node.__drawingEnabled
+function toggleLineDrawing(svg, viewport, lines) {
+    const svgNode = svg.node()
+    const viewportNode = viewport.node()
+    svgNode.__drawingEnabled = !svgNode.__drawingEnabled
 
     const lineGen = d3.line().curve(d3.curveBasis)
 
-    if (node.__drawingEnabled) {
+    if (svgNode.__drawingEnabled) {
         let points = []
         let path = null
 
         svg.on("mousedown.draw", (event) => {
-            points = [d3.pointer(event, node)]
-            path = svg.append("path")
+            points = [d3.pointer(event, viewportNode)]
+            path = viewport.append("path")
                 .attr("class", "drawn-line")
                 .attr("fill", "none")
                 .attr("stroke", "black")
@@ -1950,16 +1956,18 @@ function toggleLineDrawing(svg, lines) {
 
         svg.on("mousemove.draw", (event) => {
             if (!path) return
-            points.push(d3.pointer(event, node))
+            points.push(d3.pointer(event, viewportNode))
             path.attr("d", lineGen(points))
         })
 
         const finish = () => {
-            if (path && points.length > 1) lines.push(points)
+            if (path && points.length > 1) {
+                lines.push(points)
+                tdrawRefactor(true, true)
+            }
+
             path = null
             points = []
-            // updateSvg(true)
-            tdrawRefactor(true)
         }
         svg.on("mouseup.draw", finish)
         svg.on("mouseleave.draw", finish)
@@ -1973,7 +1981,7 @@ function toggleLineDrawing(svg, lines) {
             .style("cursor", null)
     }
 
-    return node.__drawingEnabled
+    return svgNode.__drawingEnabled
 }
 
 
