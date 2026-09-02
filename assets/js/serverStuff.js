@@ -13,7 +13,7 @@ async function getPaletteList() {
 
     for (const [key, value] of Object.entries(palettes)) {
         let t
-        if (paletteType === "eval1" && (value.name.startsWith("week15") || value.name.startsWith("week47") || value.name.startsWith("week05")|| value.name.startsWith("p1"))) {
+        if (paletteType === "eval1" && (value.name.startsWith("week15") || value.name.startsWith("week47") || value.name.startsWith("week05")|| value.name.startsWith(participant))) {
             t = await loadStateFromJson(serverBaseUrl + "palettes/" + value.name)
 
 
