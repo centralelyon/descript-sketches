@@ -51,11 +51,11 @@
 <div style="display: flex;border-bottom: 2px solid #333;width: 100vw;height: 39px;background-color: #424242">
     <h3 style="display: inline;font-weight: 700;margin-left:10px;color: #eeeeee;line-height: 29px">Descript</h3>
     <div style="display: flex;font-weight: 700;margin-left:140px;color: #eeeeee">
-<!--        <div>
-            <input type="checkbox" id="server"  style="display: inline-block" name="server" value="server" checked  onchange="switchUseServer(this.checked)">
-            <p style="margin-right: 9px;line-height: 17px;width: 80px;display: inline-block">Use server</p>
+        <!--        <div>
+                    <input type="checkbox" id="server"  style="display: inline-block" name="server" value="server" checked  onchange="switchUseServer(this.checked)">
+                    <p style="margin-right: 9px;line-height: 17px;width: 80px;display: inline-block">Use server</p>
 
-        </div>-->
+                </div>-->
         <p style="margin-right: 9px;line-height: 17px;width: 80px">Load an Example...</p>
         <select id="stateSelector" style="color: #424242"></select>
         <!--        <img onclick="loadState()" src="assets/images/buttons/right.png" style="filter:invert(1);width: 25px;height: 26px;cursor: pointer">-->
@@ -220,7 +220,8 @@
 
 
                     <div class="buttonImg selectablePallete">
-                        <img onclick="switchmod('fill')" src="assets/images/buttons/paint-bucket.png" style="transform: scaleX(-1)"/>
+                        <img onclick="switchmod('fill')" src="assets/images/buttons/paint-bucket.png"
+                             style="transform: scaleX(-1)"/>
                     </div>
 
 
@@ -260,7 +261,7 @@
                     </div>
                     <div style="display: flex">
                         <p style="margin-bottom: 0;margin-right: 5px;margin-top: 3px;font-weight: 550">Hand-style: </p>
-                    <input type="checkbox" onchange="togglePaletteInk(this.checked)">
+                        <input type="checkbox" onchange="togglePaletteInk(this.checked)">
                     </div>
                 </div>
                 <div style="height: 475px;display: inline-block;background: rgba(250,250,250,0.05);padding: 1px;border-radius: 9px;border: 1px solid #f1f1f1;">
@@ -303,10 +304,19 @@
         </div>
         <!--        <div style="display: flex;">-->
         <div class="tabHolder">
-            <div class="tab active" num="0" onclick="selectTab(this)"> <img style="height: 15px" src="assets/images/buttons/chart.png"/> Visualization</div>
-            <div class="tab" num="1" onclick="selectTab(this)"> <img style="height: 15px" src="assets/images/buttons/grid.png"/>  Generative </div>
-            <div class="tab" num="2" onclick="selectTab(this)"> <img style="height: 15px" src="assets/images/buttons/show.png"/>  Source Image</div>
-            <div class="tab" num="3" onclick="selectTab(this)"> <img style="height: 15px" src="assets/images/buttons/show.png"/> Template</div>
+            <div class="tab active" num="0" onclick="selectTab(this)"><img style="height: 15px"
+                                                                           src="assets/images/buttons/chart.png"/>
+                Visualization
+            </div>
+            <div class="tab" num="1" onclick="selectTab(this)"><img style="height: 15px"
+                                                                    src="assets/images/buttons/grid.png"/> Generative
+            </div>
+            <div class="tab" num="2" onclick="selectTab(this)"><img style="height: 15px"
+                                                                    src="assets/images/buttons/show.png"/> Source Image
+            </div>
+            <div class="tab" num="3" onclick="selectTab(this)"><img style="height: 15px"
+                                                                    src="assets/images/buttons/show.png"/> Template
+            </div>
 
             <!--            <div class="tab">Settings</div>-->
             <p style="font-weight: 600;float: right;position: absolute;top: 43px;left: 7px"> HOLD SHIFT TO ZOOM/PAN</p>
@@ -321,10 +331,10 @@
                         </div>-->
                 <div style="position: absolute;margin-top:3px;margin-left:5px;width: 30px;display: flex;justify-content: center;flex-direction: column">
                     <div class="buttonImg">
-                <!--        <img id="moveBtn"
-                             src="assets/images/buttons/move.png" class="lightBorder"
-                             onclick="switchSampleSelect(this,'move')"
-                             style="display: inline-block"/>-->
+                        <!--        <img id="moveBtn"
+                                     src="assets/images/buttons/move.png" class="lightBorder"
+                                     onclick="switchSampleSelect(this,'move')"
+                                     style="display: inline-block"/>-->
                         <p style="margin-left: 40px;font-weight: 600;height: 30px;width: 200px;position: absolute;display: inline-block">
                             Hold shift to pan</p>
                     </div>
@@ -332,11 +342,11 @@
                         <img id="selectedButton" src="assets/images/buttons/rect.png" class="lightBorder"
                              onclick="switchSampleSelect(this,'rect')" style=""/>
                     </div>
-   <!--                 <div class="buttonImg">
-                        <img src="assets/images/buttons/lasso.png" class="lightBorder"
-                             onclick="switchSampleSelect(this,'free')"
-                             style=""/>
-                    </div>-->
+                    <!--                 <div class="buttonImg">
+                                         <img src="assets/images/buttons/lasso.png" class="lightBorder"
+                                              onclick="switchSampleSelect(this,'free')"
+                                              style=""/>
+                                     </div>-->
 
 
                     <div class="buttonImg">
@@ -396,7 +406,7 @@
                         <div id="layout-force" onclick="switchLayout(this, 'force')" class="selectedLayout">Force</div>
                         <div id="layout-grid" onclick="switchLayout(this, 'grid')">Grid</div>
                         <div id="layout-scatterplot" onclick="switchLayout(this, 'scatterplot')"> Scatterplot</div>
-                                            <div onclick="switchLayout(this, 'draw')"> Draw</div>
+                        <div onclick="switchLayout(this, 'draw')"> Draw</div>
                     </div>
                     <div id="optionsSandbox" style="display: flex;margin-top: -9px">
                         <div>
@@ -413,6 +423,11 @@
                                     id="y-axis">
                                 <option value="none">none</option>
                             </select>
+                        </div>
+                        <div>
+                            <button id="resetLines"  onclick="resetLines(this)"
+                                    style="display: none;height: 30px;padding: unset;margin-left: 3px;margin-top: 12px">Reset Lines
+                            </button>
                         </div>
                     </div>
 

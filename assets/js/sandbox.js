@@ -8,7 +8,7 @@ let chartAxis = {
     y: "none"
 }
 
-let lines = []
+let glines = []
 const defaultMinColor = "#a50026"
 const defaultMaxColor = "#313695"
 
@@ -20,6 +20,8 @@ let layout = "force"
 let megaGlyph = {}
 
 let simulation
+
+let LineFlag = false
 
 let debugGlyph = {
     temp0: {
@@ -1112,6 +1114,15 @@ function switchLayout(elem, type) {
 
     layout = type
 
+    if (type === "draw") {
+
+        let button = document.getElementById("resetLines");
+        button.style.display = "block";
+    } else {
+        let button = document.getElementById("resetLines");
+        button.style.display = "none";
+    }
+
 
     tdrawRefactor(true)
 
@@ -1665,6 +1676,11 @@ async function drawDrag(svg, viewport, data, encodings, order, tmarks, update) {
 
 }
 
+function resetLines () {
+    glines = [[[500,500],[520,520]]]
+    LineFlag = true
+    tdrawRefactor(true,true)
+}
 
 async function drawForce(svg, viewport, data, encodings, order, tmarks, update) {
 
@@ -1885,11 +1901,12 @@ async function tdrawRefactor(update = false, anim = false) {
     } else if (layout === "drag") {
         drawDrag(svg, viewport, data, encodings, order, tmarks, update)
     } else if (layout === "draw") {
-        toggleLineDrawing(svg,viewport, lines)
-        drawAlongLines(svg, viewport, lines, data, encodings, order, tmarks, update)
+        toggleLineDrawing(svg,viewport, glines)
+        drawAlongLines(svg, viewport, glines, data, encodings, order, tmarks, update)
     }
 
 }
+
 
 
 function getScales(svg, data) {
@@ -1943,15 +1960,22 @@ function toggleLineDrawing(svg, viewport, lines) {
 
     if (svgNode.__drawingEnabled) {
         let points = []
+
+
         let path = null
 
         svg.on("mousedown.draw", (event) => {
+
+
+
             points = [d3.pointer(event, viewportNode)]
             path = viewport.append("path")
                 .attr("class", "drawn-line")
                 .attr("fill", "none")
                 .attr("stroke", "black")
                 .attr("stroke-width", 2)
+
+
         })
 
         svg.on("mousemove.draw", (event) => {
@@ -1962,7 +1986,13 @@ function toggleLineDrawing(svg, viewport, lines) {
 
         const finish = () => {
             if (path && points.length > 1) {
+
+                if(LineFlag) {
+                    glines = []
+                    LineFlag = false
+                }
                 lines.push(points)
+                glines.push(points)
                 tdrawRefactor(true, true)
             }
 
