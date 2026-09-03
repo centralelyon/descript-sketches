@@ -173,11 +173,6 @@ async function addRectSample(x, y, width, height) {
     tcan.width = Math.min(coords[2], canW)
     tcan.height = Math.min(coords[3], canH)
 
-    // tcan.style.border = "solid " + categories[selectedCategory].color + " 2px"
-
-    let tcat = {}
-
-    // tcat[selectedCategory] = categories[selectedCategory]
 
     let tres = {
         x: coords[0],
@@ -211,7 +206,7 @@ async function addRectSample(x, y, width, height) {
     // dragElement4(tdiv)
 
 
-    // tdiv.onclick = editSample
+    tdiv.onclick = editSample
 
     // sampleData.push(tres)
     /*
@@ -229,10 +224,6 @@ async function addRectSample(x, y, width, height) {
         tcan.width,
         tcan.height);
 
-    // let svg = d3.select("#sampleDisplay")
-
-    // fillSvg(sampleData)
-    // showControls(svg, [tres.x - 25, tres.y - 25], tcan)
 }
 
 
@@ -313,6 +304,8 @@ async function addGrabSample(x, y, width, height) {
     tdiv.innerHTML = `<img onclick="removeMark('mark${n}',this)" src="assets/images/buttons/del.png" style="width: 12px;cursor: pointer;position: absolute;top: 3px;left: 3px"> `
     tdiv.appendChild(grabbed);
     container.appendChild(tdiv)
+
+    tdiv.onclick = editSample
 
     // dragElement4(tdiv)
 
@@ -584,7 +577,7 @@ function movePalette2Available() {
 
 function editSample(e) {
     let el = e.target
-
+    console.log("dasdsadsa");
     let proto
     if (el.matches("canvas")) {
         proto = el
