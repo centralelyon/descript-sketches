@@ -518,7 +518,7 @@ onkeydown = function (e) {
         drawImage()
     }
 
-    if (keymap[46]) {
+    if (keymap[46] || keymap[8]) {
         // d3.selectAll("circle[num='0']").remove()
         if (selectedAnchor !== undefined) {
 
