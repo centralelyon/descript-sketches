@@ -241,7 +241,13 @@ async function initAllPalette() {
 
             for (let i = 0; i < palSources.length; i++) {
 
-                await loadSavedPalette(`assets/tempData/palettes/${palSources[i]}.json`);
+
+                if (hackCORS) {
+                    await loadSavedPalette(`assets/tempData/palettes/${palSources[i]}.json`);
+                } else {
+                    await loadSavedPalette(`assets/tempData/palettes/${palSources[i]}.json`);
+                }
+
             }
         }
 
@@ -329,6 +335,12 @@ async function initAllPalette() {
 
 
 async function loadSavedPalette(url) {
+
+    if (hackCORS) {
+        // url = `${corsURI}${encodeURIComponent(url)}`
+
+        url  = `https://corsproxy.io/?${encodeURIComponent(url)}`;
+    }
 
     const palette = await d3.json(url)
     console.log(palette);

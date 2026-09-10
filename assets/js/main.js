@@ -14,7 +14,7 @@ let selectedCategory = "default";
 let catColors = ["#4e79a7", "#f28e2c", "#e15759", "#76b7b2", "#59a14f", "#edc949", "#af7aa1", "#ff9da7", "#9c755f", "#bab0ab"]
 
 let paletteType = "eval1"
-let participant= "p9"
+let participant = "p9"
 
 
 let mouseDown = 0
@@ -76,7 +76,8 @@ const sampleImageList = [
 
 ]
 
-
+let hackCORS = false
+let corsURI = 'https://corsproxy.io/?key=webdemo1&url='
 const availableStates = ["*new*", "week26.json", "week15.json"]
 
 let collageColScale
@@ -96,7 +97,7 @@ function loadExamples(week = 0, author = "giorgia") {
     for (let i = 0; i < examples.length; i++) {
         const el = document.createElement("div");
         el.style.backgroundImage = "url('" + examples[i] + "')";
-        el.setAttribute('type', "example");
+        el.setAttribute('type', "examples");
         el.setAttribute('value', i);
         el.onclick = loadEx
         container.appendChild(el);
@@ -192,7 +193,7 @@ async function loadEx() {
             let json = await getData(dataRef[author + "_" + i])
             importData(json);
         }
-    } else if (type === "example") {
+    } else if (type === "examples") {
         loadImg(examples[this.getAttribute("value")])
     }
 }
@@ -220,7 +221,10 @@ async function init() {
     // loadExamples(week);
 
 
-    await preloadBgImg()
+/*    if (window.location.href.indexOf("anonymous.4open.science") > -1) {
+        hackCORS = true
+    }*/
+    // await preloadBgImg()
     if (urlParams.has("state")) {
         let name = urlParams.get("state");
 
@@ -1153,16 +1157,20 @@ function dumpState() {
             chartDataset: dumpObject(chartDataset),
         }*/
 
+    for (const [key, value] of Object.entries(megaPalettes)) {
+        delete megaPalettes[key].originImg;
+    }
+
     const state = {
         megaPalettes: megaPalettes,
         megaGlyph: megaGlyph,
         dataBinding: dataBinding,
-        allPalettes: allPalettes,
+        // allPalettes: allPalettes,
         chartDataset: chartDataset,
         chartAxis: chartAxis,
-        layout: layout,
+        // layout: layout,
         nAnchor: nAnchor,
-        palSources: palSources
+        // palSources: palSources
 
     }
 
@@ -1201,26 +1209,34 @@ async function loadStateFromJson(source, randou = false) {
         json = await source.text();
     } else if (typeof source === "string") {
         let response
-        if(randou) {
+
+        if (hackCORS) {
+            // source = `${corsURI}${urisource}`
+            source  = `https://corsproxy.io/?${encodeURIComponent(source)}`;
+        }
+        if (randou) {
             if (credentials === "") {
                 login()
             }
-             response = await     fetch(source, {
+
+
+            response = await fetch(source, {
                 method: 'GET',
                 headers: {
-                    "Authorization": `Basic ${credentials}`
+                    "Authorization": `Basic ${credentials}`,
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+                    'Access-Control-Allow-Headers': '*',
+
 
                 }
             })
 
 
-        }else {
-             response = await fetch(source);
+        } else {
+
+            response = await fetch(source);
         }
-
-
-
-
 
 
         if (!response.ok) {
@@ -1405,7 +1421,7 @@ function makeTemplateDisplay() {
 
         el.style.backgroundImage = `url('assets/images/templates/${key}.png')`;
         el.setAttribute('value', value);
-        el.onclick =loadTemplate
+        el.onclick = loadTemplate
         el.innerHTML = `<p> ${key} </p>`;
         container.appendChild(el);
 
@@ -1415,9 +1431,15 @@ function makeTemplateDisplay() {
 async function loadTemplate() {
     const name = this.getAttribute("value")
 
-    let state = await loadStateFromJson( name,true);
+    let state = await loadStateFromJson(name, true);
     initState(state)
 
     let tab = document.querySelector(".tab[num='0']");
     selectTab(tab)
+}
+
+
+function makeMinimalState(url) {
+
+
 }

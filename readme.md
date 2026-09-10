@@ -4,17 +4,13 @@ Descript is a visualization authoring tool that manipulate images to parametrize
 Descript lets you sample regions from hand-drawn or photographed images, curate them into reusable palettes, bind them
 to data, and compose them into data-bound glyphs.
 
+## Standalone
 
-## How to Install and Launch
+For more infomation about how our standalone version of DESCRIPT, to generate glyph can be used in d3, please refer to the "standalone" directly, which includes a demonstration.
 
-Clone the repository:
+## How Launch
 
-```bash
-git clone https://github.com/centralelyon/descript-sketches.git
-cd descript-sketches
-```
-
-Then start a local server:
+Start a local server:
 
 ```bash
 python3 -m http.server

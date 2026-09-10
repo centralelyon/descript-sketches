@@ -599,21 +599,6 @@ function deleteDataList(id) {
 function getCollageOrder(drawingData) {
 
     let order = []
-    /*
-        let tdat = {
-            0: {from: {key: "stem"}, to: {key: "co-worker"}},
-            1: {from: {key: "anxiety"}}
-        }*/
-
-
-    /*   let tdat = {
-           anxiety: "",
-           stem: "",
-           wrong: "",
-           francis: ""
-       }
-
-       drawingData = tdat*/
 
     let links = getRelationships(drawingData)
 
