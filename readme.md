@@ -5,11 +5,6 @@ Descript lets you sample regions from hand-drawn or photographed images, curate 
 to data, and compose them into data-bound glyphs.
 
 
-## How to Access
-
-A live version of the tool is available
-here: [centralelyon.github.io/descript-sketches](https://centralelyon.github.io/descript-sketches/)
-
 ## How to Install and Launch
 
 Clone the repository:
